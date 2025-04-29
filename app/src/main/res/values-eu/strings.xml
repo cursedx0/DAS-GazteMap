@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GazteMap</string>
+    <string name="registrarse">Erregistratu</string>
+    <string name="nombreUsuario">Erabiltzaile izena</string>
+    <string name="contraseña">Pasahitza</string>
+    <string name="errorUsuarioEmailCogidos">Erabiltzaile izena edo email jadanik hartuta.</string>
+    <string name="iniciarSesion">Saioa hasi</string>
+    <string name="atras">Atzera</string>
+    <string name="usuarioCreado">Erabiltzailea zuzenki sortuta.</string>
+    <string name="usuarioError">Arazoak egon dira erabiltzailea sortutakoan.</string>
+</resources>

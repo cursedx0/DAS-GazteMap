@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GazteMap</string>
+    <string name="registrarse">Register</string>
+    <string name="nombreUsuario">Username</string>
+    <string name="contraseña">Password</string>
+    <string name="errorUsuarioEmailCogidos">Username or email already taken.</string>
+    <string name="iniciarSesion">Login</string>
+    <string name="atras">Back</string>
+    <string name="usuarioCreado">User was created successfully.</string>
+    <string name="usuarioError">An error occurred while creating the user.</string>
+</resources>

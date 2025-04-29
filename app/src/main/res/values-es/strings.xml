@@ -1,8 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">GazteMap</string>
-    <string name="registrarse">Registrarse</string>
+    <string name="registrarse">Resgitrarse</string>
     <string name="nombreUsuario">Nombre de usuario</string>
-    <string name="email" translatable="false">Email</string>
     <string name="contraseña">Contraseña</string>
     <string name="errorUsuarioEmailCogidos">Nombre de usuario o email ya en uso.</string>
     <string name="iniciarSesion">Iniciar sesión</string>
