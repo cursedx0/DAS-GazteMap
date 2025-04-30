@@ -9,4 +9,7 @@
     <string name="atras">Back</string>
     <string name="usuarioCreado">User was created successfully.</string>
     <string name="usuarioError">An error occurred while creating the user.</string>
+    <string name="loginExitoso">Logged in successfully.</string>
+    <string name="loginIncorrecto">Incorrect email or password.</string>
+    <string name="loginError">An error occurred while logging in.</string>
 </resources>

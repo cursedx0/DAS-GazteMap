@@ -9,4 +9,7 @@
     <string name="atras">Atrás</string>
     <string name="usuarioCreado">Usuario creado con éxito.</string>
     <string name="usuarioError">Error al crear el usuario.</string>
+    <string name="loginExitoso">Se ha iniciado sesión con éxito.</string>
+    <string name="loginIncorrecto">"Email o contraseña incorrectos. "</string>
+    <string name="loginError">Error al iniciar sesión.</string>
 </resources>

@@ -145,8 +145,8 @@ public class BDConnector extends Worker {
                         JSONObject jsonParam = new JSONObject();
                         jsonParam.put("accion", accion);
 
-                        if(getInputData().getString("usuario")!=null && getInputData().getString("pw")!=null){
-                            jsonParam.put("usuario", getInputData().getString("usuario"));
+                        if(getInputData().getString("email")!=null && getInputData().getString("pw")!=null){
+                            jsonParam.put("email", getInputData().getString("email"));
                             jsonParam.put("pw", getInputData().getString("pw"));
                             paramsValidos = true;
                         }
@@ -179,7 +179,7 @@ public class BDConnector extends Worker {
                                 String codigo = respuestaJson.optString("code", "-1");
                                 int id = respuestaJson.optInt("id", -1);
                                 String nombre = respuestaJson.optString("nombre", "error");
-                                int monedas = respuestaJson.optInt("monedas", 0);
+                                int puntos = respuestaJson.optInt("puntos", 0);
 
                                 Log.d("RESPUESTA", response.toString()); // Imprimir respuesta del servidor
                                 return Result.success(new Data.Builder()
@@ -187,7 +187,7 @@ public class BDConnector extends Worker {
                                         .putString("code", codigo)
                                         .putInt("id", id)
                                         .putString("nombre", nombre)
-                                        .putInt("monedas", monedas)
+                                        .putInt("puntos", puntos)
                                         .build());
                             } else {
                                 Log.e("ERROR", "Error en la solicitud: " + responseCode);

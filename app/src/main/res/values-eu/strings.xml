@@ -9,4 +9,7 @@
     <string name="atras">Atzera</string>
     <string name="usuarioCreado">Erabiltzailea zuzenki sortuta.</string>
     <string name="usuarioError">Arazoak egon dira erabiltzailea sortutakoan.</string>
+    <string name="loginExitoso">Saioa zuzenki hasi da.</string>
+    <string name="loginIncorrecto">Email edo pasahitza okerrak.</string>
+    <string name="loginError">Ezin izan da saioa hasi.</string>
 </resources>
