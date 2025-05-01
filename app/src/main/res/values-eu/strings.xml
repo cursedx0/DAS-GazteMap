@@ -12,4 +12,19 @@
     <string name="loginExitoso">Saioa zuzenki hasi da.</string>
     <string name="loginIncorrecto">Email edo pasahitza okerrak.</string>
     <string name="loginError">Ezin izan da saioa hasi.</string>
+    <string name="opciones">Ezarpenak</string>
+    <string name="cerrarSesion">Saioa amaitu</string>
+    <string name="si">Bai</string>
+    <string name="no">Ez</string>
+    <string name="viajar">Bidaiatu</string>
+    <string name="español">Erdera</string>
+    <string name="ingles">Ingelesa</string>
+    <string name="euskera">Euskara</string>
+    <string name="sistema">Sistema</string>
+    <string name="oscuro">Iluna</string>
+    <string name="claro">Argia</string>
+    <string name="idioma">Hizkuntza</string>
+    <string name="tema">Estilo</string>
+    <string name="eligeIdioma">Hizkuntz bat aukeratu</string>
+    <string name="eligeTema">Estilo bat aukeratu</string>
 </resources>

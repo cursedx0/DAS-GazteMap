@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:key="cat_datos_personales"
+        android:title="@string/idioma">
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/idiomas"
+            android:entryValues="@array/idiomasCodes"
+            android:key="idioma"
+            android:title="@string/eligeIdioma" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/tema">
+
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/fondos"
+            android:entryValues="@array/fondosCodes"
+            android:key="tema"
+            android:title="@string/eligeTema" />
+    </PreferenceCategory>
+</PreferenceScreen>

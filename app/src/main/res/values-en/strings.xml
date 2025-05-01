@@ -12,4 +12,19 @@
     <string name="loginExitoso">Logged in successfully.</string>
     <string name="loginIncorrecto">Incorrect email or password.</string>
     <string name="loginError">An error occurred while logging in.</string>
+    <string name="opciones">Options</string>
+    <string name="cerrarSesion">Log off</string>
+    <string name="si">Yes</string>
+    <string name="no">No</string>
+    <string name="viajar">Travel</string>
+    <string name="español">Spanish</string>
+    <string name="ingles">English</string>
+    <string name="euskera">Basque</string>
+    <string name="sistema">System</string>
+    <string name="oscuro">Dark</string>
+    <string name="claro">Bright</string>
+    <string name="idioma">Language</string>
+    <string name="tema">Theme</string>
+    <string name="eligeIdioma">Choose a language</string>
+    <string name="eligeTema">Choose a theme</string>
 </resources>

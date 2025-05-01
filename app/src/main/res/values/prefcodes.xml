@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="idiomasCodes">
+        <item>ES</item>
+        <item>EN</item>
+        <item>EU</item>
+    </string-array>
+    <string-array name="fondosCodes">
+        <item>SY</item>
+        <item>BR</item>
+        <item>DK</item>
+    </string-array>
+</resources>

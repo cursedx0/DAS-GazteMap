@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/viajar"
+        android:title="@string/viajar" />
+    <item
+        android:id="@+id/opciones"
+        android:title="@string/opciones" />
+    <item
+        android:id="@+id/top500"
+        android:title="@string/top500" />
+    <item
+        android:id="@+id/logout"
+        android:title="@string/cerrarSesion" />
+</menu>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources><string-array name="idiomas">
+    <item>@string/español</item>
+    <item>@string/ingles</item>
+    <item>@string/euskera</item>
+</string-array>
+    <string-array name="fondos">
+        <item>@string/sistema</item>
+        <item>@string/claro</item>
+        <item>@string/oscuro</item>
+    </string-array>
+</resources>
