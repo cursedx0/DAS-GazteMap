@@ -27,4 +27,6 @@
     <string name="tema">Estilo</string>
     <string name="eligeIdioma">Hizkuntz bat aukeratu</string>
     <string name="eligeTema">Estilo bat aukeratu</string>
+    <string name="errorEmail">Baliozko email bat idatzi.</string>
+    <string name="faltanCampos">Atal guztiak bete, mesedez.</string>
 </resources>

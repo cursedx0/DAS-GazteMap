@@ -27,4 +27,6 @@
     <string name="tema">Theme</string>
     <string name="eligeIdioma">Choose a language</string>
     <string name="eligeTema">Choose a theme</string>
+    <string name="errorEmail">Insert a valid email.</string>
+    <string name="faltanCampos">FIll every field to continue.</string>
 </resources>

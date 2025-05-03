@@ -27,4 +27,6 @@
     <string name="tema">Tema</string>
     <string name="eligeIdioma">Elige un idioma</string>
     <string name="eligeTema">Elige un tema</string>
+    <string name="errorEmail">Introduce un email válido.</string>
+    <string name="faltanCampos">Rellena todos los campos.</string>
 </resources>
