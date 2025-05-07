@@ -44,5 +44,5 @@ dependencies {
     implementation libs.rxandroid
 
     //Dependency for the GoogleMaps API
-    implementation 'com.google.android.gms:play-services-maps:18.1.0'
+    implementation libs.play.services.maps
 }
