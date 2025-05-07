@@ -74,7 +74,8 @@ public class AllActivity extends BaseActivity {
             transaction.commit();
         }
         else if (id==R.id.viajar){
-
+            Intent intent = new Intent(this, MapActivity.class);
+            startActivity(intent);
         }
         else if (id==R.id.logout){
 
