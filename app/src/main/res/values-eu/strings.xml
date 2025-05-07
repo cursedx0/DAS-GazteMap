@@ -29,4 +29,8 @@
     <string name="eligeTema">Estilo bat aukeratu</string>
     <string name="errorEmail">Baliozko email bat idatzi.</string>
     <string name="faltanCampos">Atal guztiak bete, mesedez.</string>
+    <string name="bienvenidoVuelta">Ongi etorri berriro, %1s</string>
+    <string name="entrar">Sartu</string>
+    <string name="cambiarUsuario">Erabiltzailea aldatu</string>
+    <string name="recuerdame">Saioa mantendu</string>
 </resources>

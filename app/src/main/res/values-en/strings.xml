@@ -29,4 +29,8 @@
     <string name="eligeTema">Choose a theme</string>
     <string name="errorEmail">Insert a valid email.</string>
     <string name="faltanCampos">FIll every field to continue.</string>
+    <string name="bienvenidoVuelta">Welcome back, %1s</string>
+    <string name="entrar">Enter</string>
+    <string name="cambiarUsuario">Change user</string>
+    <string name="recuerdame">Remember me</string>
 </resources>

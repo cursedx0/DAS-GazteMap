@@ -29,4 +29,8 @@
     <string name="eligeTema">Elige un tema</string>
     <string name="errorEmail">Introduce un email válido.</string>
     <string name="faltanCampos">Rellena todos los campos.</string>
+    <string name="bienvenidoVuelta">Bienvenid@ de vuelta, %1s</string>
+    <string name="entrar">Entrar</string>
+    <string name="cambiarUsuario">Cambiar usuario</string>
+    <string name="recuerdame">Recuérdame</string>
 </resources>

@@ -11,7 +11,9 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -41,6 +43,13 @@ public class MainActivity extends BaseActivity {
         EditText iEmail = findViewById(R.id.iEmail);
         EditText iPw = findViewById(R.id.iPw);
         Button buttonLogin = findViewById(R.id.buttonLogin);
+        CheckBox cRember = findViewById(R.id.checkRember);
+        TextView bienvenido = findViewById(R.id.textBienvenido);
+        Button buttonCambiarU = findViewById(R.id.buttonCambiarU);
+        Button buttonEntrar = findViewById(R.id.buttonEntrar);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+        SharedPreferences.Editor editor = prefs.edit();
 
         buttonReg.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,6 +57,40 @@ public class MainActivity extends BaseActivity {
                 Intent intent2 = new Intent(MainActivity.this, RegisterActivity.class);
                 intent2.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent2);
+            }
+        });
+
+        buttonCambiarU.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                iPw.setVisibility(View.VISIBLE);
+                iEmail.setVisibility(View.VISIBLE);
+                buttonLogin.setVisibility(View.VISIBLE);
+                buttonReg.setVisibility(View.VISIBLE);
+                cRember.setVisibility(View.VISIBLE);
+
+                buttonCambiarU.setVisibility(View.INVISIBLE);
+                bienvenido.setText(getString(R.string.bienvenidoVuelta,prefs.getString("usuario","xxx")));
+                bienvenido.setVisibility(View.INVISIBLE);
+                buttonEntrar.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        buttonEntrar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editor.putBoolean("rember", true);
+                editor.apply();
+
+                Intent intent = new Intent(MainActivity.this, AllActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.putExtra("id", prefs.getInt("id",0));
+                intent.putExtra("nombre", prefs.getString("nombre","error"));
+                intent.putExtra("puntos", prefs.getInt("puntos",0));
+                intent.putExtra("email",prefs.getString("email","error"));
+                intent.putExtra("rember",true);
+
+                startActivity(intent);
             }
         });
 
@@ -85,10 +128,11 @@ public class MainActivity extends BaseActivity {
                                         String nombre = workInfo.getOutputData().getString("nombre");
                                         int puntos = workInfo.getOutputData().getInt("puntos",0);
                                         //String emailOut = workInfo.getOutputData().getString("email");
-
-                                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                                        SharedPreferences.Editor editor = prefs.edit();
+                                        editor.putInt("id", id);
                                         editor.putString("nombre", nombre);
+                                        editor.putString("email", email);
+                                        editor.putInt("puntos",0);
+                                        editor.putBoolean("rember", cRember.isChecked());
                                         editor.apply();
 
                                         Intent intent = new Intent(MainActivity.this, AllActivity.class);
@@ -97,10 +141,11 @@ public class MainActivity extends BaseActivity {
                                         intent.putExtra("nombre", nombre);
                                         intent.putExtra("puntos", puntos);
                                         intent.putExtra("email",email);
+                                        intent.putExtra("rember", cRember.isChecked());
 
                                         startActivity(intent);
 
-                                    }else if(code.equals("2")){
+                                    }else if(code.equals("1")){
                                         //bad credentials
                                         Toast.makeText(getApplicationContext(), getString(R.string.loginIncorrecto), Toast.LENGTH_SHORT).show();
                                     }else{
@@ -116,6 +161,19 @@ public class MainActivity extends BaseActivity {
 
             }
         });
+
+        if(prefs.getBoolean("rember", false)){
+            iPw.setVisibility(View.INVISIBLE);
+            iEmail.setVisibility(View.INVISIBLE);
+            buttonLogin.setVisibility(View.INVISIBLE);
+            buttonReg.setVisibility(View.INVISIBLE);
+            cRember.setVisibility(View.INVISIBLE);
+
+            buttonCambiarU.setVisibility(View.VISIBLE);
+            bienvenido.setText(getString(R.string.bienvenidoVuelta,prefs.getString("nombre","error")));
+            bienvenido.setVisibility(View.VISIBLE);
+            buttonEntrar.setVisibility(View.VISIBLE);
+        }
 
     }
 }
