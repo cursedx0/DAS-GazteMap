@@ -45,4 +45,8 @@ dependencies {
 
     //Dependency for the GoogleMaps API
     implementation libs.play.services.maps
+
+    implementation libs.glide
+    annotationProcessor libs.compiler
+    implementation libs.gson
 }

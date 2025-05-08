@@ -83,6 +83,17 @@ public class AllActivity extends BaseActivity {
         else if(id==R.id.top500){
 
         }
+        else if(id==R.id.amigos){
+            /*getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainer, new AmigosFragment())
+                    .commit();*/
+            AmigosFragment af = new AmigosFragment();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            findViewById(R.id.fragmentContainer).setVisibility(View.VISIBLE);
+            transaction.replace(R.id.fragmentContainer, af);
+            transaction.addToBackStack(null); //para poder regresar al fragmento anterior
+            transaction.commit();
+        }
         return super.onOptionsItemSelected(item);
     }
 }

@@ -8,6 +8,9 @@
         android:id="@+id/opciones"
         android:title="@string/opciones" />
     <item
+        android:id="@+id/amigos"
+        android:title="@string/amigos" />
+    <item
         android:id="@+id/top500"
         android:title="@string/top500" />
     <item
