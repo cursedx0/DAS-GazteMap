@@ -44,7 +44,7 @@ public class BDConnector extends Worker {
                 Log.d("WORKER", "Usando url por defecto.");
                 direccion = "http://51.44.167.78:80/lbilbao040/WEB/GazteMap/api.php"; //POR DEFECTO
             }else if(getInputData().getString("url").equals("1")){
-                direccion = "http://51.44.167.78:80/lbilbao040/WEB/GazteMap/monedas.php"; //monedas
+                direccion = "http://51.44.167.78:80/lbilbao040/WEB/GazteMap/amigos.php"; //monedas
             }else if(getInputData().getString("url").equals("2")){
                 direccion = "http://51.44.167.78:80/lbilbao040/WEB/GazteMap/pfp.php"; //monedas
             }else {

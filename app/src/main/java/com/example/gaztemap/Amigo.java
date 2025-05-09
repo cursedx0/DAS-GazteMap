@@ -4,9 +4,9 @@ public class Amigo {
     private String nombre;
     private String fotoUrl;
 
-    public Amigo(String nombre, String email) {
+    public Amigo(String nombre, String fotoUrl) {
         this.nombre = nombre;
-        this.fotoUrl = email;
+        this.fotoUrl = fotoUrl;
     }
 
     public String getNombre() {
