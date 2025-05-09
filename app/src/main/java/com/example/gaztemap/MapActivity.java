@@ -47,8 +47,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             TextView txtEmail = headerView.findViewById(R.id.campoEmail);
 
             // poner aqui datos sacados al hacer login
-            txtNombre.setText("Mi Usuario");
-            txtEmail.setText("usuario@ejemplo.com");
+            txtNombre.setText("Walter White");
+            txtEmail.setText("wwhite214@meth.com");
             // imagen: imgPerfil.setImageResource(fotolukenserver);
         }
         Button botonEdit = headerView.findViewById(R.id.btnEditUser);

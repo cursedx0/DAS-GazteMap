@@ -2,4 +2,33 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="azul_clarito">#1C64A6</color>
+    <color name="azul_600">#1E88E5</color>
+    <color name="azul_800">#1565C0</color>
+    <color name="gris_azulado_200">#B0BEC5</color>
+    <color name="gris_azulado_700">#608192</color>
+    <color name="negro">#000000</color>
+    <color name="blanco">#FFFFFF</color>
+
+    <color name="gris_claro_fondo">#F5F5F5</color>
+    <color name="gris_medio">#757575</color>
+
+    <color name="texto_principal">#212121</color>
+    <color name="texto_secundario">#616161</color>
+    <color name="texto_terciario">#9E9E9E</color>
+    <color name="rojo">#FF0000</color>
+    <color name="boton_normal">#1E88E5</color>
+    <color name="boton_presionado">#1565C0</color>
+    <color name="texto_boton">#FFFFFF</color>
+    <color name="widget_fondo">#FFFFFF</color>
+    <color name="widget_texto_nombre">#FF000000</color>
+    <color name="widget_texto_precio">#FF4CAF50</color>
+    <color name="widget_texto_fecha">#FF607D8B</color>
+
+
+
+
+    <color name="mensaje_enviado_background">#0078FF</color>
+    <color name="mensaje_recibido_background">#EFEFEF</color>
+    <color name="nombre_remitente">#3F51B5</color>
 </resources>
