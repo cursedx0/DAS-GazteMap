@@ -35,4 +35,13 @@
     <string name="cambiarUsuario">Cambiar usuario</string>
     <string name="recuerdame">Recuérdame</string>
     <string name="amigos">Amigos</string>
+    <string name="menu_button">Abrir menú</string>
+    <string name="apartados">📌 Apartados</string>
+    <string name="apartado_mapa">🗺️ Mapa</string>
+    <string name="apartado_TOP500">🏆 Top 500 usuarios</string>
+    <string name="apartado_amigos">🤝 Amigos</string>
+    <string name="apartado_configuracion">⚙️ Opciones</string>
+    <string name="alerta_notificaciones">Notificaciones</string>
+    <string name="navigation_drawer_open">Abrir menú de navegación</string>
+    <string name="navigation_drawer_close">Cerrar menú de navegación</string>
 </resources>

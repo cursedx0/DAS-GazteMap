@@ -1,31 +1,69 @@
 package com.example.gaztemap;
 
 import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.imageview.ShapeableImageView;
+import com.google.android.material.navigation.NavigationView;
 
-public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapActivity extends FragmentActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
 
     private GoogleMap mMap;
+    private DrawerLayout drawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        // Obtén el fragmento del mapa y notifica cuando esté listo
+        drawerLayout = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        // Configurar el perfil en el menú lateral
+        View headerView = navigationView.getMenu().findItem(R.id.n_perfil).getActionView();
+        if (headerView != null) {
+            ShapeableImageView imgPerfil = headerView.findViewById(R.id.imgPerfil);
+            TextView txtNombre = headerView.findViewById(R.id.campoNombreNav);
+            TextView txtEmail = headerView.findViewById(R.id.campoEmail);
+
+            // poner aqui datos sacados al hacer login
+            txtNombre.setText("Mi Usuario");
+            txtEmail.setText("usuario@ejemplo.com");
+            // imagen: imgPerfil.setImageResource(fotolukenserver);
+        }
+
+        // botón para abrir el menú lateral
+        FloatingActionButton menuButton = findViewById(R.id.menu_button);
+        menuButton.setOnClickListener(view -> {
+            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+            } else {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
     }
+
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
@@ -34,5 +72,34 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         LatLng exampleLocation = new LatLng(43.2630, -2.9350); // Coordenadas de Bilbao
         mMap.addMarker(new MarkerOptions().position(exampleLocation).title("Marcador en Bilbao"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(exampleLocation, 15));
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Cerrar el drawer si está abierto cuando se presiona atrás
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.map) {
+            // No se, ahora actualiza
+            if (mMap != null) {
+                LatLng bilbao = new LatLng(43.2630, -2.9350);
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(bilbao, 15));
+            }
+        } else if (id == R.id.amigos) {
+        } else if (id == R.id.top500) {
+        } else if (id == R.id.opciones) {
+        }
+
+        drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
     }
 }
