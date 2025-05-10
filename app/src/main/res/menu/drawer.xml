@@ -28,7 +28,9 @@
                 <item
                     android:id="@+id/Amigos"
                     android:title="@string/apartado_amigos" />
-
+                <item
+                    android:id="@+id/Foro"
+                    android:title="@string/apartado_foro" />
                 <item
                     android:id="@+id/Opciones"
                     android:title="@string/apartado_configuracion" />

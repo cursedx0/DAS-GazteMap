@@ -105,16 +105,16 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-        Log.d("faga", item.toString());
-        if (id == R.id.map) {
+        if (id == R.id.Viajar) {
             // No se, ahora actualiza
             if (mMap != null) {
                 LatLng bilbao = new LatLng(13.2630, -2.9350);
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(bilbao, 1));
             }
-        } else if (id == R.id.amigos) {
-        } else if (id == R.id.top500) {
-        } else if (id == R.id.opciones) {
+        } else if (id == R.id.Amigos) {
+        } else if (id == R.id.Top500) {
+        } else if (id == R.id.Foro){}
+        else if (id == R.id.Opciones) {
 
         }
 
