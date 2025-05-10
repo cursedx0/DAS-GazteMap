@@ -2,9 +2,12 @@ package com.example.gaztemap;
 
 import android.app.AlertDialog;
 import android.app.DialogFragment;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +28,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.navigation.NavigationView;
+
+import java.util.Map;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
 
@@ -64,6 +69,17 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             AlertDialog dialog = builder.create();
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             dialog.show();
+        });
+
+        Button botonCerrar = headerView.findViewById(R.id.btnLogout);
+        botonCerrar.setOnClickListener(a -> {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MapActivity.this);
+            SharedPreferences.Editor editor = prefs.edit();
+            Intent logout = new Intent(MapActivity.this, MainActivity.class);
+            editor.putBoolean("rember", false);
+            editor.apply();
+            startActivity(logout);
+
         });
         // botón para abrir el menú lateral
         FloatingActionButton menuButton = findViewById(R.id.menu_button);
