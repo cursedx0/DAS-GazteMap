@@ -5,6 +5,7 @@ import android.app.DialogFragment;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -38,7 +39,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
+        navigationView.setCheckedItem(R.id.Viajar);
         // Configurar el perfil en el menú lateral
         View headerView = navigationView.getMenu().findItem(R.id.n_perfil).getActionView();
         if (headerView != null) {
@@ -47,8 +48,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             TextView txtEmail = headerView.findViewById(R.id.campoEmail);
 
             // poner aqui datos sacados al hacer login
-            txtNombre.setText("Walter White");
-            txtEmail.setText("wwhite214@meth.com");
+            String nombre = getIntent().getStringExtra("nombre");
+            String email = getIntent().getStringExtra("email");
+            txtNombre.setText(nombre);
+            txtEmail.setText(email);
             // imagen: imgPerfil.setImageResource(fotolukenserver);
         }
         Button botonEdit = headerView.findViewById(R.id.btnEditUser);
@@ -102,12 +105,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-
+        Log.d("faga", item.toString());
         if (id == R.id.map) {
             // No se, ahora actualiza
             if (mMap != null) {
-                LatLng bilbao = new LatLng(43.2630, -2.9350);
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(bilbao, 15));
+                LatLng bilbao = new LatLng(13.2630, -2.9350);
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(bilbao, 1));
             }
         } else if (id == R.id.amigos) {
         } else if (id == R.id.top500) {
