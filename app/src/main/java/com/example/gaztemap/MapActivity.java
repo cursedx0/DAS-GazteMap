@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -13,12 +14,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.Manifest;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -35,6 +41,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     private GoogleMap mMap;
     private DrawerLayout drawerLayout;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,10 +109,44 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Marcar Moyua porque si
-        LatLng exampleLocation = new LatLng(43.2630, -2.9350); // Coordenadas de Bilbao
-        mMap.addMarker(new MarkerOptions().position(exampleLocation).title("Marcador en Bilbao"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(exampleLocation, 15));
+        // Verificar permisos de ubicación
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            enableUserLocation();
+        } else {
+            // Mostrar mensaje al usuario
+            new AlertDialog.Builder(this)
+                    .setTitle("Ubicación desactivada")
+                    .setMessage("Por favor, activa la ubicación del móvil para usar esta funcionalidad.")
+                    .setPositiveButton("Aceptar", (dialog, which) -> {
+                        // Opcional: Abrir configuración de ubicación
+                        Intent intent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(intent);
+                    })
+                    .setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss())
+                    .show();
+        }
+    }
+    private void enableUserLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+
+            // Configurar la cámara y agregar un marcador en Moyúa
+            LatLng moyua = new LatLng(43.2630, -2.9350);
+            mMap.addMarker(new MarkerOptions().position(moyua).title("Moyúa"));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(moyua, 15));
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults); // Llamada a la clase base
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                enableUserLocation();
+            }
+        }
     }
 
     @Override
