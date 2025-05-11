@@ -1,7 +1,6 @@
-package com.example.gaztemap;
+package com.das.gaztemap;
 
 import android.app.AlertDialog;
-import android.app.DialogFragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -9,7 +8,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -23,8 +21,6 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -34,8 +30,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.navigation.NavigationView;
-
-import java.util.Map;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
 
@@ -170,7 +164,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             }
         } else if (id == R.id.Amigos) {
         } else if (id == R.id.Top500) {
-        } else if (id == R.id.Foro){}
+        } else if (id == R.id.Foro){
+            Intent intent = new Intent(MapActivity.this, ForumActivity.class);
+            startActivity(intent);
+        }
         else if (id == R.id.Opciones) {
 
         }

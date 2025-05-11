@@ -1,4 +1,4 @@
-package com.example.gaztemap;
+package com.das.gaztemap;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -14,7 +14,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;

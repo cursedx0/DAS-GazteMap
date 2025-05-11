@@ -45,4 +45,16 @@
     <string name="alerta_notificaciones">Notificaciones</string>
     <string name="navigation_drawer_open">Abrir menú de navegación</string>
     <string name="navigation_drawer_close">Cerrar menú de navegación</string>
+    <string name="nuevo_post">Nuevo post</string>
+    <string name="escribe_algo">¿Qué quieres compartir hoy?</string>
+    <string name="publicar">Publicar</string>
+    <string name="descripcion_menu">Abrir menú de navegación</string>
+    <string name="descripcion_nuevo_post">Crear nueva publicación</string>
+    <string name="nav_header_title">GazteMap</string>
+    <string name="nav_header_subtitle">Comunidad vasca</string>
+    <string name="menu_inicio">Inicio</string>
+    <string name="menu_perfil">Perfil</string>
+    <string name="menu_ajustes">Ajustes</string>
+    <string name="menu_ayuda">Ayuda</string>
+    <string name="menu_cerrar_sesion">Cerrar sesión</string>
 </resources>

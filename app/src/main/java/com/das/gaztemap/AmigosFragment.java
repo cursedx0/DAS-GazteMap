@@ -1,4 +1,4 @@
-package com.example.gaztemap;
+package com.das.gaztemap;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
