@@ -3,6 +3,7 @@ package com.example.gaztemap;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,7 +48,8 @@ public class AmigosFragment extends Fragment {
         //SharedPreferences.Editor editor = prefs.edit();
         // Aquí usas WorkManager para hacer una solicitud a tu servidor PHP
         Data inputData = new Data.Builder()
-                .putString("accion", "get_amigos")
+                .putString("accion", "amigos")
+                .putString("url","1")
                 .putString("usuario", prefs.getString("nombre","error"))
                 .build();
 
@@ -63,6 +65,7 @@ public class AmigosFragment extends Fragment {
                         // Parsear JSON a lista de amigos y actualizar el adaptador
                         amigosList.clear();
                         amigosList.addAll(parsearJson(json));
+                        Log.d("AMIGOS",amigosList.toString());
                         adapter.notifyDataSetChanged();
                     }
                 });
@@ -70,6 +73,7 @@ public class AmigosFragment extends Fragment {
 
     private List<Amigo> parsearJson(String json) {
         // Parsea JSON a lista de objetos Amigo
+        Log.d("AMIGOS PARSER",json);
         Gson gson = new Gson();
         TypeToken<List<Amigo>> typeToken = new TypeToken<List<Amigo>>() {};
         return gson.fromJson(json, typeToken.getType());
