@@ -335,7 +335,7 @@ public class BDConnector extends Worker {
                                 String mensaje = respuestaJson.optString("message", "Sin mensaje");
                                 String codigo = respuestaJson.optString("code", "-1");
                                 String nombre = respuestaJson.optString("nombre", "error");
-                                JSONArray amigosArray = respuestaJson.optJSONArray("amigoos_json");
+                                JSONArray amigosArray = respuestaJson.optJSONArray("amigos");
 
                                 Log.d("RESPUESTA", response.toString()); // Imprimir respuesta del servidor
                                 return Result.success(new Data.Builder()
