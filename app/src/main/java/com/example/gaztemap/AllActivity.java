@@ -32,6 +32,7 @@ public class AllActivity extends BaseActivity {
         });
 
         //TODO INTENCIONES: ESTA ACTIVIDAD TENDRÁ UN HIDDENDRAWER (LA PESTAÑA QUE SALE DE LA IZQUIERDA CON LA FOTO DE PERFIL Y DETALLES DEL USUARIO) Y UN TOOLBAR, ASI COMO UN FRAGMENT CONTAINER QUE SE MODIFICARÁ DEPENDIENDO DE LA OPCIÓN ELEGIDA (PUEDE HABER EXCEPCIONES).
+        // esta metido dentro del mapa <(:)
         //USUARIOS DE PRUEBA
             //email: xxx, pw: xxx
             //email: yyy, pw: yyy

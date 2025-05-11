@@ -82,7 +82,7 @@ public class MainActivity extends BaseActivity {
                 editor.putBoolean("rember", true);
                 editor.apply();
 
-                Intent intent = new Intent(MainActivity.this, AllActivity.class);
+                    Intent intent = new Intent(MainActivity.this, MapActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 intent.putExtra("id", prefs.getInt("id",0));
                 intent.putExtra("nombre", prefs.getString("nombre","error"));

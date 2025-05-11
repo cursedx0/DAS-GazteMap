@@ -1,7 +1,32 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.GazteMap" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    <style name="Theme.GazteMap" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Colores primarios para modo oscuro -->
+        <item name="colorPrimary">@color/black</item>
+        <item name="colorPrimaryVariant">@color/azul_600</item>
+
+        <!-- Fondos oscuros -->
+        <item name="android:colorBackground">#121212</item>
+        <item name="colorSurface">#383838</item>
+
+        <!-- Colores de texto -->
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">#B0B0B0</item>
+
+        <!-- Color de los botones y color del texto en botones -->
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="materialButtonStyle">@style/Widget.App.Button</item>
+
+        <!-- Barra de estado -->
+        <item name="android:statusBarColor">@color/negro</item>
+
+        <!-- Forzar el color de fondo de la ventana -->
+        <item name="android:windowBackground">#121212</item>
+    </style>
+
+    <!-- Estilo personalizado para botones en modo oscuro -->
+    <style name="Widget.App.Button" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/negro</item>
+        <item name="android:textColor">@color/blanco</item>
     </style>
 </resources>

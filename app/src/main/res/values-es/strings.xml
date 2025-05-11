@@ -34,4 +34,5 @@
     <string name="cambiarUsuario">Cambiar usuario</string>
     <string name="recuerdame">Recuérdame</string>
     <string name="amigos">Amigos</string>
+    <string name="menu_button">Abrir menú</string>
 </resources>

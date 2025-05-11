@@ -1,9 +1,38 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.GazteMap" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <style name="Theme.GazteMap" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Colores primarios para modo claro -->
+        <item name="colorPrimary">@color/azul_600</item>
+        <item name="colorPrimaryVariant">@color/azul_800</item>
+
+        <!-- Fondos claros -->
+        <item name="android:colorBackground">@color/gris_claro_fondo</item>
+        <item name="colorSurface">@color/blanco</item>
+
+        <!-- Colores de texto oscuro -->
+        <item name="android:textColor">@color/negro</item>
+        <item name="android:textColorPrimary">@color/negro</item>
+        <item name="android:textColorSecondary">@color/gris_medio</item>
+
+        <!-- Color de los botones y color del texto en botones -->
+        <item name="colorOnPrimary">@color/blanco</item>
+        <item name="materialButtonStyle">@style/Widget.App.Button</item>
+
+        <!-- Barra de estado -->
+        <item name="android:statusBarColor">@color/azul_800</item>
+
+        <!-- Forzar el color de fondo de la lista acciones etc-->
+        <item name="android:windowBackground">@color/gris_claro_fondo</item>
+
     </style>
 
-    <style name="Theme.GazteMap" parent="Base.Theme.GazteMap" />
+    <!-- Estilo personalizado para botones en modo claro -->
+    <style name="Widget.App.Button" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/azul_600</item>
+        <item name="android:textColor">@color/blanco</item>
+    </style>
+
+    <style name="Ciculo" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">30%</item>
+    </style>
 </resources>
