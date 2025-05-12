@@ -2,9 +2,11 @@ package com.example.gaztemap;
 
 import android.app.AlertDialog;
 import android.app.DialogFragment;
+import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -35,7 +37,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.navigation.NavigationView;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Map;
+
+import widget.MapAppWidget;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
 
@@ -126,6 +132,39 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     .setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss())
                     .show();
         }
+        captureMapSnapshot();
+    }
+
+    private void captureMapSnapshot() {
+        if (mMap != null) {
+            mMap.snapshot(bitmap -> {
+                if (bitmap != null) {
+                    saveBitmapToCache(bitmap);
+                }
+            });
+        }
+    }
+
+    private void saveBitmapToCache(Bitmap bitmap) {
+        try {
+            File cacheDir = getCacheDir();
+            File file = new File(cacheDir, "map_snapshot.png");
+            Log.d("MapActivity", "Intentando guardar el archivo en: " + file.getAbsolutePath());
+            FileOutputStream fos = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.close();
+            Log.d("MapActivity", "Mapa guardado en caché exitosamente: " + file.getAbsolutePath());
+            updateWidget(); // Actualizar el widget
+        } catch (Exception e) {
+            Log.e("MapActivity", "Error al guardar el mapa en caché", e);
+        }
+    }
+
+    private void updateWidget() {
+        Intent intent = new Intent(this, MapAppWidget.class);
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        sendBroadcast(intent);
+        Log.d("MapActivity", "Widget actualizado");
     }
     private void enableUserLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
