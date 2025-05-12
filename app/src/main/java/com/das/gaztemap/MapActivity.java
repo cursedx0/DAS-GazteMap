@@ -1,4 +1,4 @@
-package com.example.gaztemap;
+package com.das.gaztemap;
 
 import android.app.AlertDialog;
 import android.app.DialogFragment;
@@ -209,7 +209,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             }
         } else if (id == R.id.Amigos) {
         } else if (id == R.id.Top500) {
-        } else if (id == R.id.Foro){}
+        } else if (id == R.id.Foro){
+            Intent intent = new Intent(MapActivity.this, ForumActivity.class);
+            startActivity(intent);
+        }
         else if (id == R.id.Opciones) {
 
         }

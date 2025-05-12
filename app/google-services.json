@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "357889262228",
+    "project_id": "gaztemap",
+    "storage_bucket": "gaztemap.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:357889262228:android:9b2f60ed3a17e6a18a6a81",
+        "android_client_info": {
+          "package_name": "com.das.gaztemap"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0QEj9YeQvD_wTQHuNh4fSnBban0e9HL4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

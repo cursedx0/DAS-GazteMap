@@ -1,4 +1,4 @@
-package com.example.gaztemap;
+package com.das.gaztemap;
 
 public class Amigo {
     private String nombre;

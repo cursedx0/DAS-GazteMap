@@ -20,7 +20,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragmentContainer"
-        android:name="com.example.gaztemap.Preferencias"
+        android:name="com.das.gaztemap.Preferencias"
         android:layout_width="406dp"
         android:layout_height="650dp"
         android:layout_marginTop="18dp"
