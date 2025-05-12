@@ -1,17 +1,14 @@
 package widget;
 
-import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import com.example.gaztemap.MapActivity;
-import com.example.gaztemap.R;
+import com.das.gaztemap.R;
 
 import java.io.File;
 
