@@ -1,7 +1,10 @@
 package com.das.gaztemap;
 
+import static com.das.gaztemap.ForumActivity.BASE_URL;
+
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,10 +14,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -57,11 +68,16 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         holder.textViewLikes.setText(String.valueOf(post.getLikeCount()) + " likes");
         holder.textViewComments.setText(String.valueOf(post.getCommentCount()) + " comentarios");
 
-        // Verificar si el post pertenece al usuario actual para habilitar opciones adicionales
         boolean isMyPost = String.valueOf(currentUserId).equals(post.getUserId());
         holder.buttonMore.setVisibility(isMyPost ? View.VISIBLE : View.INVISIBLE);
 
-        holder.buttonLike.setOnClickListener(view -> likePost(post));
+        updateLikeButton(holder.buttonLike, post.isLiked());
+
+        holder.buttonLike.setOnClickListener(v -> {
+            likePost(post, position);
+            post.setLiked(!post.isLiked());
+            updateLikeButton(holder.buttonLike, post.isLiked());
+        });
         holder.buttonComment.setOnClickListener(view -> openComments(post));
         holder.buttonShare.setOnClickListener(view -> sharePost(post));
 
@@ -72,6 +88,13 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                 deletePost(post);
             });
         }
+    }
+    private void updateLikeButton(MaterialButton button, boolean isLiked) {
+        button.setIconResource(isLiked ? R.drawable.likefull : R.drawable.like);
+        button.setIconTint(ColorStateList.valueOf(
+                isLiked ? ContextCompat.getColor(context, R.color.azul_600)
+                        : ContextCompat.getColor(context, R.color.azul_800)
+        ));
     }
 
     @Override
@@ -97,23 +120,52 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         }
     }
 
-    private void likePost(Post post) {
-        String userId = String.valueOf(currentUserId);
-        DatabaseReference likesRef = mDatabase.child("post-likes")
-                .child(post.getPostId()).child(userId);
+    private void likePost(Post post, int position) {
+        JSONObject jsonBody = new JSONObject();
+        try {
+            jsonBody.put("accion", "dar_like");
+            jsonBody.put("post_id", post.getPostId());
+            jsonBody.put("user_id", currentUserId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-        likesRef.setValue(true)
-                .addOnSuccessListener(aVoid -> {
-                    int newLikeCount = post.getLikeCount() + 1;
-                    mDatabase.child("posts").child(post.getPostId())
-                            .child("likeCount").setValue(newLikeCount);
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.POST,
+                BASE_URL,
+                jsonBody,
+                response -> {
+                    try {
+                        if (response.getString("status").equals("success")) {
+                            int newLikeCount = response.getInt("newCount");
+                            boolean isLiked = response.getBoolean("isLiked");
 
-                    Toast.makeText(context, "Te gusta esta publicación", Toast.LENGTH_SHORT).show();
-                });
+                            post.setLikeCount(newLikeCount);
+                            post.setLiked(isLiked);
+
+                            notifyItemChanged(position);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(context, "Error en la respuesta", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    Toast.makeText(context, "Error de conexión", Toast.LENGTH_SHORT).show();
+                    // Opcional: Revertir el cambio visual si falla
+                    post.setLiked(!post.isLiked());
+                    notifyItemChanged(position);
+                }
+        );
+
+        Volley.newRequestQueue(context).add(request);
     }
 
     private void openComments(Post post) {
-        Toast.makeText(context, "BOMBARDIRO CROCODILO", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(context, CommentsActivity.class);
+        intent.putExtra("POST_ID", post.getPostId());
+        intent.putExtra("POST_CONTENT", post.getContent());
+        context.startActivity(intent);
     }
 
     private void sharePost(Post post) {

@@ -8,6 +8,7 @@ public class Post {
     private long timestamp;
     private int likeCount;
     private int commentCount;
+    private boolean isLiked;
 
     public Post() {}
 
@@ -38,7 +39,8 @@ public class Post {
 
     public int getLikeCount() { return likeCount; }
     public void setLikeCount(int likeCount) { this.likeCount = likeCount; }
-
+    public boolean isLiked() { return isLiked; }
+    public void setLiked(boolean liked) { isLiked = liked; }
     public int getCommentCount() { return commentCount; }
     public void setCommentCount(int commentCount) { this.commentCount = commentCount; }
 }

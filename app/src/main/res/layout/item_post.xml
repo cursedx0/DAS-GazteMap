@@ -82,7 +82,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!-- Post Content -->
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/textViewContent"
             android:layout_width="match_parent"

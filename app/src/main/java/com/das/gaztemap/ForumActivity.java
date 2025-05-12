@@ -48,7 +48,7 @@ public class ForumActivity extends AppCompatActivity {
     private String userEmail;
 
     // Volley y URL
-    private static final String BASE_URL = "http://ec2-51-44-167-78.eu-west-3.compute.amazonaws.com/lbilbao040/WEB/GazteMap/api.php";
+    public static final String BASE_URL = "http://ec2-51-44-167-78.eu-west-3.compute.amazonaws.com/lbilbao040/WEB/GazteMap/api.php";
     private RequestQueue requestQueue;
 
     @Override
@@ -180,6 +180,7 @@ public class ForumActivity extends AppCompatActivity {
         JSONObject jsonBody = new JSONObject();
         try {
             jsonBody.put("accion", "obtener_hilos");
+            jsonBody.put("user_id", userId);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -189,8 +190,14 @@ public class ForumActivity extends AppCompatActivity {
                 BASE_URL,
                 jsonBody,
                 response -> manejarRespuestaCargarPosts(response),
-                error -> mostrarError("Error al cargar hilos: " + error.getMessage())
-        );
+                error -> {
+                    Log.e("JSON_ERROR", "Error en la solicitud: " + error.toString());
+                    if (error.networkResponse != null) {
+                        Log.e("JSON_ERROR", "Código de respuesta HTTP: " + error.networkResponse.statusCode);
+                        Log.e("JSON_ERROR", "Datos de error: " + new String(error.networkResponse.data));
+                    }
+}       );
+        Log.d("fafga", String.valueOf(request));
 
         requestQueue.add(request);
     }
@@ -200,6 +207,7 @@ public class ForumActivity extends AppCompatActivity {
         try {
             if (response.getString("status").equals("success")) {
                 JSONArray hilos = response.getJSONArray("hilos");
+                Log.d("API_DEBUG", "Número de hilos: " + hilos.length()); // ✅
                 for (int i = 0; i < hilos.length(); i++) {
                     JSONObject hilo = hilos.getJSONObject(i);
                     Post post = new Post(
@@ -211,15 +219,13 @@ public class ForumActivity extends AppCompatActivity {
                     );
                     post.setLikeCount(hilo.getInt("likeCount"));
                     post.setCommentCount(hilo.getInt("commentCount"));
-                    postList.add(0, post);
+                    post.setLiked(hilo.getBoolean("isLiked"));
+                    postList.add(post);
                 }
                 postAdapter.notifyDataSetChanged();
-
-                if (postList.isEmpty()) {
-                    Toast.makeText(this, "No hay publicaciones todavía", Toast.LENGTH_SHORT).show();
-                }
             }
         } catch (JSONException e) {
+            Log.e("API_ERROR", "Error al parsear JSON: " + e.getMessage());
             e.printStackTrace();
         }
     }

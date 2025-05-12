@@ -9,7 +9,6 @@
     android:fitsSystemWindows="true"
     tools:context=".ForumActivity">
 
-    <!-- Contenido principal -->
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -27,7 +26,6 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"/>
 
-            <!-- Layout para crear nuevo post -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/newPostLayout"
                 android:layout_width="match_parent"
@@ -64,7 +62,7 @@
                             android:text="@string/nuevo_post"
                             android:textAppearance="?attr/textAppearanceHeadline6"
                             android:layout_marginStart="8dp"
-                            android:textColor="@color/black"/>
+                            android:textColor="@color/texto_principal"/>
                     </LinearLayout>
 
                     <EditText
@@ -95,7 +93,6 @@
             </com.google.android.material.card.MaterialCardView>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!-- Botón de menú flotante -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/menu_button"
             android:layout_width="wrap_content"
