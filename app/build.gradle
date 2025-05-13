@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     id 'com.google.gms.google-services'
+    id 'com.google.protobuf' version '0.9.4'
 }
 
 android {
@@ -26,6 +27,12 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.21.12'
     }
 }
 
@@ -56,4 +63,7 @@ dependencies {
     implementation libs.firebase.auth
     implementation libs.firebase.messaging
     implementation platform(libs.firebase.bom)
+    //implementation libs.gtfs.realtime.bindings //obtencion datos gtfs, pero android studio no lo reconoce
+    implementation libs.okhttp //solicitudes http
+
 }

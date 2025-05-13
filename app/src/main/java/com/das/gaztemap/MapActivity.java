@@ -43,11 +43,17 @@ import java.util.Map;
 
 import widget.MapAppWidget;
 
+//import com.google.transit.realtime.GtfsRealtime; //mirar builld.gradle para detalles
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
 
     private GoogleMap mMap;
     private DrawerLayout drawerLayout;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +61,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         setContentView(R.layout.activity_map);
 
         drawerLayout = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setCheckedItem(R.id.Viajar);
         // Configurar el perfil en el menú lateral
@@ -188,6 +194,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         }
     }
 
+    /* //mirar build.gradle para detalles
+    public GtfsRealtime.FeedMessage downloadFeed(String url) throws IOException {
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder().url(url).build();
+        Response response = client.newCall(request).execute();
+
+        return GtfsRealtime.FeedMessage.parseFrom(response.body().byteStream());
+    }*/
+
     @Override
     public void onBackPressed() {
         // Cerrar el drawer si está abierto cuando se presiona atrás
@@ -207,10 +222,20 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 LatLng bilbao = new LatLng(13.2630, -2.9350);
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(bilbao, 1));
             }
+            NavigationView navigationView = findViewById(R.id.nav_view);
+            navigationView.setCheckedItem(R.id.Viajar);
         } else if (id == R.id.Amigos) {
+            Intent intent = new Intent(MapActivity.this, AllActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.putExtra("frag","amigos");
+            NavigationView navigationView = findViewById(R.id.nav_view);
+            navigationView.setCheckedItem(R.id.Amigos);
+            startActivity(intent);
         } else if (id == R.id.Top500) {
         } else if (id == R.id.Foro){
             Intent intent = new Intent(MapActivity.this, ForumActivity.class);
+            NavigationView navigationView = findViewById(R.id.nav_view);
+            navigationView.setCheckedItem(R.id.Foro);
             startActivity(intent);
         }
         else if (id == R.id.Opciones) {
@@ -219,5 +244,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        navigationView.setCheckedItem(R.id.Viajar);
     }
 }
