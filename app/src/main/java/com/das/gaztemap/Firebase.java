@@ -1,44 +1,65 @@
 package com.das.gaztemap;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
+
+import androidx.core.app.NotificationCompat;
+
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import android.util.Log;
-
-import org.json.JSONObject;
 
 public class Firebase extends FirebaseMessagingService {
+
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        String title = remoteMessage.getNotification().getTitle();
-        String body = remoteMessage.getNotification().getBody();
-        Log.d("FCM", "Notificación recibida: " + title + " - " + body);
+        if (remoteMessage.getData().size() > 0) {
+            String title = remoteMessage.getNotification() != null ?
+                    remoteMessage.getNotification().getTitle() : "Nuevo comentario";
+            String body = remoteMessage.getNotification() != null ?
+                    remoteMessage.getNotification().getBody() : "";
+
+            mostrarNotificacion(title, body);
+        }
     }
 
-    @Override
-    public void onNewToken(String token) {
-        enviarTokenAlServidor(token);
-    }
+    private void mostrarNotificacion(String title, String body) {
+        Intent intent = new Intent(this, CommentsActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-    private void enviarTokenAlServidor(String token) {
-        String url = "http://ec2-51-44-167-78.eu-west-3.compute.amazonaws.com/lbilbao040/WEB/GazteMap/.php";
-        RequestQueue queue = Volley.newRequestQueue(this);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
 
-        JSONObject json = new JSONObject();
-        try {
-            json.put("token", token);
-            json.put("email", "usuario@example.com");
-        } catch (Exception e) {
-            Log.e("Token", "Error al crear JSON: " + e.getMessage());
+        String channelId = "comentarios_channel";
+        NotificationCompat.Builder notificationBuilder =
+                new NotificationCompat.Builder(this, channelId)
+                        .setSmallIcon(R.drawable.chat)
+                        .setContentTitle(title)
+                        .setContentText(body)
+                        .setAutoCancel(true)
+                        .setContentIntent(pendingIntent)
+                        .setPriority(NotificationCompat.PRIORITY_HIGH);
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    channelId,
+                    "Comentarios",
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            notificationManager.createNotificationChannel(channel);
         }
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, json,
-                response -> Log.d("Token", "Token enviado correctamente"),
-                error -> Log.e("Token", "Error al enviar token: " + error.getMessage())
+        notificationManager.notify(
+                (int) System.currentTimeMillis(),
+                notificationBuilder.build()
         );
-        queue.add(request);
     }
 }

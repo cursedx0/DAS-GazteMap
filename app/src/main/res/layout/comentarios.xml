@@ -27,7 +27,8 @@
                 app:chipIcon="@drawable/notifications"
                 app:chipIconTint="@color/white"
                 app:chipStrokeColor="@color/white"
-                app:chipStrokeWidth="1dp"/>
+                app:chipStrokeWidth="1dp"
+                android:checkable="true"/>
         </RelativeLayout>
 
         <androidx.recyclerview.widget.RecyclerView

@@ -2,10 +2,12 @@ package com.das.gaztemap;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,8 +15,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,15 +29,20 @@ import java.util.List;
 
 public class CommentsActivity extends AppCompatActivity {
 
+    private static final String PREFS_NAME = "SubscriptionsPrefs";
+    private static final String SUBSCRIPTION_KEY_PREFIX = "subscribed_to_";
+
     private RecyclerView recyclerViewComments;
     private TextInputEditText editTextComment;
     private FloatingActionButton fabSendComment;
+    private Chip chipSubscribe;
 
     private CommentAdapter commentAdapter;
     private List<Comment> commentList;
 
     private int currentUserId;
     private String postId;
+    private FirebaseMessaging firebaseMessaging;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,19 +50,21 @@ public class CommentsActivity extends AppCompatActivity {
         setContentView(R.layout.comentarios);
 
         postId = getIntent().getStringExtra("POST_ID");
-        String postContent = getIntent().getStringExtra("POST_CONTENT");
+        firebaseMessaging = FirebaseMessaging.getInstance();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         currentUserId = prefs.getInt("id", 0);
 
         inicializarVistas();
         cargarComentarios();
+        configurarChipNotificaciones();
     }
 
     private void inicializarVistas() {
         recyclerViewComments = findViewById(R.id.recyclerViewComments);
         editTextComment = findViewById(R.id.editTextComment);
         fabSendComment = findViewById(R.id.fabSendComment);
+        chipSubscribe = findViewById(R.id.chipSubscribe);
 
         commentList = new ArrayList<>();
         commentAdapter = new CommentAdapter(this, commentList);
@@ -61,6 +72,63 @@ public class CommentsActivity extends AppCompatActivity {
         recyclerViewComments.setAdapter(commentAdapter);
 
         fabSendComment.setOnClickListener(v -> enviarComentario());
+    }
+
+    private void configurarChipNotificaciones() {
+        Log.d("FCdM", "Intentando suscribir a: post_" + postId);
+
+        chipSubscribe.setChecked(estaSubscrito());
+
+        chipSubscribe.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if(isChecked) {
+                suscribirATopic();
+            } else {
+                desuscribirDeTopic();
+            }
+        });
+    }
+
+    private boolean estaSubscrito() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        return prefs.getBoolean(SUBSCRIPTION_KEY_PREFIX + postId, false);
+    }
+
+    private void guardarEstadoSubscripcion(boolean subscribed) {
+        SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
+        editor.putBoolean(SUBSCRIPTION_KEY_PREFIX + postId, subscribed);
+        editor.apply();
+    }
+    private void suscribirATopic() {
+        Log.d("FCM", "Intentando suscribir a: post_" + postId);
+        String topic = "post_" + postId;
+        firebaseMessaging.subscribeToTopic(topic)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d("FCM", "Suscripción exitosa");
+                        guardarEstadoSubscripcion(true);
+                        Toast.makeText(this, "Notificaciones activadas", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Log.e("FCM", "Error en suscripción", task.getException());
+                        chipSubscribe.setChecked(false);
+                        Toast.makeText(this, "Error al activar notificaciones", Toast.LENGTH_SHORT).show();
+                        new Handler(Looper.getMainLooper()).postDelayed(this::suscribirATopic, 2000);
+                    }
+                });
+    }
+
+    private void desuscribirDeTopic() {
+        String topic = "post_" + postId;
+        firebaseMessaging.unsubscribeFromTopic(topic)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        guardarEstadoSubscripcion(false);
+                        Toast.makeText(this, "Notificaciones desactivadas", Toast.LENGTH_SHORT).show();
+                    } else {
+                        chipSubscribe.setChecked(true);
+                        Toast.makeText(this, "Error al desactivar notificaciones", Toast.LENGTH_SHORT).show();
+                        new Handler(Looper.getMainLooper()).postDelayed(this::desuscribirDeTopic, 2000);
+                    }
+                });
     }
 
     private void cargarComentarios() {
