@@ -34,4 +34,11 @@
     <string name="cambiarUsuario">Erabiltzailea aldatu</string>
     <string name="recuerdame">Saioa mantendu</string>
     <string name="amigos">Lagunak</string>
+    <string name="sinAmigos">Ez daukazu lagunarik oraindik.</string>
+    <string name="contraseñaNueva">Pasahitz berria</string>
+    <string name="editarPerfil">Profila editatu</string>
+    <string name="cancelar">Ezeztatu</string>
+    <string name="aceptar">Onartu</string>
+    <string name="guardar">Gorde</string>
+    <string name="necesitaContraseña">Zure oraingo pasahitza sartu, mesedez</string>
 </resources>

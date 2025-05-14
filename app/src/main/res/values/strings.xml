@@ -57,4 +57,11 @@
     <string name="menu_ajustes">Ajustes</string>
     <string name="menu_ayuda">Ayuda</string>
     <string name="menu_cerrar_sesion">Cerrar sesión</string>
+    <string name="sinAmigos">No tienes amigos todavía.</string>
+    <string name="contraseñaNueva">Coontraseña nueva</string>
+    <string name="editarPerfil">Editar perfil</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="aceptar">Aceptar</string>
+    <string name="guardar">Guardar</string>
+    <string name="necesitaContraseña">Escribe tu contraseña actual</string>
 </resources>

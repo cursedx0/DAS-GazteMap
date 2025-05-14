@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.Manifest;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -24,7 +25,13 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -64,6 +71,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private DrawerLayout drawerLayout;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private NavigationView navigationView;
+    private String nombre;
+    private String email;
+    private ShapeableImageView imgPerfil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,27 +87,22 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         // Configurar el perfil en el menú lateral
         View headerView = navigationView.getMenu().findItem(R.id.n_perfil).getActionView();
         if (headerView != null) {
-            ShapeableImageView imgPerfil = headerView.findViewById(R.id.imgPerfil);
+            imgPerfil = headerView.findViewById(R.id.imgPerfil);
             TextView txtNombre = headerView.findViewById(R.id.campoNombreNav);
             TextView txtEmail = headerView.findViewById(R.id.campoEmail);
 
             // poner aqui datos sacados al hacer login
-            String nombre = getIntent().getStringExtra("nombre");
-            String email = getIntent().getStringExtra("email");
+            nombre = getIntent().getStringExtra("nombre");
+            email = getIntent().getStringExtra("email");
+            obtenerPfpNav();
             txtNombre.setText(nombre);
             txtEmail.setText(email);
             // imagen: imgPerfil.setImageResource(fotolukenserver);
         }
         Button botonEdit = headerView.findViewById(R.id.btnEditUser);
         botonEdit.setOnClickListener(v -> {
-            View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit, null);
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setView(dialogView);
-
-            AlertDialog dialog = builder.create();
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            dialog.show();
+            EditarUsuarioDF edf = EditarUsuarioDF.newIntance(nombre);
+            edf.show(getSupportFragmentManager(), "edit_dialog");
         });
 
         Button botonCerrar = headerView.findViewById(R.id.btnLogout);
@@ -292,6 +297,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             Intent intent = new Intent(MapActivity.this, AllActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             intent.putExtra("frag","amigos");
+            intent.putExtra("nombre",nombre);
+            intent.putExtra("email",email);
             NavigationView navigationView = findViewById(R.id.nav_view);
             navigationView.setCheckedItem(R.id.Amigos);
             startActivity(intent);
@@ -300,6 +307,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             Intent intent = new Intent(MapActivity.this, ForumActivity.class);
             NavigationView navigationView = findViewById(R.id.nav_view);
             navigationView.setCheckedItem(R.id.Foro);
+            intent.putExtra("nombre",nombre);
+            intent.putExtra("email",email);
             startActivity(intent);
         }
         else if (id == R.id.Opciones) {
@@ -314,5 +323,62 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void onResume(){
         super.onResume();
         navigationView.setCheckedItem(R.id.Viajar);
+    }
+
+    public void obtenerPfpNav(){
+        if(nombre!=null) {
+            Data datos = new Data.Builder()
+                    .putString("url","2") //url a php gestor de monedas
+                    .putString("accion", "getpfp") //obtiene monedas de usuario
+                    .putString("nombre", getIntent().getStringExtra("nombre"))
+                    .build();
+
+            OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(BDConnector.class)
+                    .setInputData(datos)
+                    .build();
+
+            WorkManager.getInstance(MapActivity.this).enqueue(request);
+
+            //escuchar resultado
+            WorkManager.getInstance(getApplicationContext())
+                    .getWorkInfoByIdLiveData(request.getId())
+                    .observe(MapActivity.this, workInfo -> {
+                        if (workInfo != null && workInfo.getState().isFinished()) {
+                            if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                                String mensaje = workInfo.getOutputData().getString("message");
+                                Log.d("WORKER", "¡200! " + mensaje);
+                                String code = workInfo.getOutputData().getString("code");
+                                if(code.equals("0")) {
+                                    //coger foto
+                                    //String fotoraw = workInfo.getOutputData().getString("imagen");
+                                    String url = workInfo.getOutputData().getString("url");
+                                    String urlConId = url + "?nocache=" + System.currentTimeMillis();
+                                    if (url!=null) {
+                                        //Log.d("URL_DEBUG", fotoraw);
+                                        /*byte[] decodedString = Base64.decode(fotoraw, Base64.DEFAULT);
+                                        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                                        pfp.setImageBitmap(decodedByte);*/
+                                        Glide.with(this)
+                                                .load(urlConId)
+                                                .placeholder(R.drawable.placeholder)
+                                                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                                .skipMemoryCache(true)
+                                                .into(imgPerfil); // Tu ImageView
+                                    }else{
+                                        imgPerfil.setImageResource(R.drawable.placeholder);
+                                    }
+                                }else{
+                                    //error total
+                                    Log.d("OBETENER IMAGEN", "FALLÓ");
+                                }
+                            } else {
+                                Log.e("WORKER", "Algo falló.");
+                            }
+                        }
+                    });
+
+        }else{
+            Toast.makeText(getApplicationContext(), getString(R.string.faltanCampos), Toast.LENGTH_SHORT).show();
+        }
     }
 }

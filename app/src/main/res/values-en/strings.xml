@@ -34,4 +34,11 @@
     <string name="cambiarUsuario">Change user</string>
     <string name="recuerdame">Remember me</string>
     <string name="amigos">Friends</string>
+    <string name="sinAmigos">You have no friends yet.</string>
+    <string name="contraseñaNueva">New password</string>
+    <string name="editarPerfil">Edit profile</string>
+    <string name="cancelar">Cancel</string>
+    <string name="aceptar">Accept</string>
+    <string name="guardar">Save</string>
+    <string name="necesitaContraseña">Enter your current password</string>
 </resources>

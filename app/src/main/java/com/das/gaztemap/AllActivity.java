@@ -2,10 +2,12 @@ package com.das.gaztemap;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -16,7 +18,13 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.navigation.NavigationView;
@@ -25,9 +33,12 @@ import java.util.Objects;
 
 public class AllActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    String frag;
+    private String frag;
     private DrawerLayout drawerLayout;
-    NavigationView navigationView;
+    private NavigationView navigationView;
+    private ShapeableImageView imgPerfil;
+    private String nombre;
+    private String email;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,19 +65,22 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
         Bundle extras = getIntent().getExtras();
         if (extras != null) {;
             frag = extras.getString("frag");
+            nombre = extras.getString("nombre");
+            email = extras.getString("email");
         }
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         actualizarNavCheck();
         View headerView = navigationView.getMenu().findItem(R.id.n_perfil).getActionView();
         if (headerView != null) {
-            ShapeableImageView imgPerfil = headerView.findViewById(R.id.imgPerfil);
+            imgPerfil = headerView.findViewById(R.id.imgPerfil);
+            obtenerPfpNav();
             TextView txtNombre = headerView.findViewById(R.id.campoNombreNav);
             TextView txtEmail = headerView.findViewById(R.id.campoEmail);
 
             // poner aqui datos sacados al hacer login
-            String nombre = getIntent().getStringExtra("nombre");
-            String email = getIntent().getStringExtra("email");
+            nombre = getIntent().getStringExtra("nombre");
+            email = getIntent().getStringExtra("email");
             txtNombre.setText(nombre);
             txtEmail.setText(email);
             // imagen: imgPerfil.setImageResource(fotolukenserver);
@@ -119,6 +133,7 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
         return true;
     }
 
+    /*
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -141,9 +156,9 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
 
         }
         else if(id==R.id.amigos){
-            /*getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentContainer, new AmigosFragment())
-                    .commit();*/
+            //getSupportFragmentManager().beginTransaction()
+                    //.replace(R.id.fragmentContainer, new AmigosFragment())
+                    //.commit();
             AmigosFragment af = new AmigosFragment();
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             findViewById(R.id.fragmentContainer).setVisibility(View.VISIBLE);
@@ -152,7 +167,7 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
             transaction.commit();
         }
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -217,6 +232,63 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
             navigationView.setCheckedItem(R.id.Amigos);
         }else if(Objects.equals(frag, "opciones")){
             navigationView.setCheckedItem(R.id.Opciones);
+        }
+    }
+
+    public void obtenerPfpNav(){
+        if(nombre!=null) {
+            Data datos = new Data.Builder()
+                    .putString("url","2") //url a php gestor de monedas
+                    .putString("accion", "getpfp") //obtiene monedas de usuario
+                    .putString("nombre", getIntent().getStringExtra("nombre"))
+                    .build();
+
+            OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(BDConnector.class)
+                    .setInputData(datos)
+                    .build();
+
+            WorkManager.getInstance(AllActivity.this).enqueue(request);
+
+            //escuchar resultado
+            WorkManager.getInstance(getApplicationContext())
+                    .getWorkInfoByIdLiveData(request.getId())
+                    .observe(AllActivity.this, workInfo -> {
+                        if (workInfo != null && workInfo.getState().isFinished()) {
+                            if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                                String mensaje = workInfo.getOutputData().getString("message");
+                                Log.d("WORKER", "¡200! " + mensaje);
+                                String code = workInfo.getOutputData().getString("code");
+                                if(code.equals("0")) {
+                                    //coger foto
+                                    //String fotoraw = workInfo.getOutputData().getString("imagen");
+                                    String url = workInfo.getOutputData().getString("url");
+                                    String urlConId = url + "?nocache=" + System.currentTimeMillis();
+                                    if (url!=null) {
+                                        //Log.d("URL_DEBUG", fotoraw);
+                                        /*byte[] decodedString = Base64.decode(fotoraw, Base64.DEFAULT);
+                                        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                                        pfp.setImageBitmap(decodedByte);*/
+                                        Glide.with(this)
+                                                .load(urlConId)
+                                                .placeholder(R.drawable.placeholder)
+                                                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                                .skipMemoryCache(true)
+                                                .into(imgPerfil); // Tu ImageView
+                                    }else{
+                                        imgPerfil.setImageResource(R.drawable.placeholder);
+                                    }
+                                }else{
+                                    //error total
+                                    Log.d("OBETENER IMAGEN", "FALLÓ");
+                                }
+                            } else {
+                                Log.e("WORKER", "Algo falló.");
+                            }
+                        }
+                    });
+
+        }else{
+            Toast.makeText(getApplicationContext(), getString(R.string.faltanCampos), Toast.LENGTH_SHORT).show();
         }
     }
 

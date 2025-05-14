@@ -35,4 +35,11 @@
     <string name="recuerdame">Recuérdame</string>
     <string name="amigos">Amigos</string>
     <string name="menu_button">Abrir menú</string>
+    <string name="sinAmigos">No tienes amigos todavía.</string>
+    <string name="contraseñaNueva">Contraseña nueva</string>
+    <string name="editarPerfil">Editar perfil</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="aceptar">Aceptar</string>
+    <string name="guardar">Guardar</string>
+    <string name="necesitaContraseña">Escribe tu contraseña actual</string>
 </resources>
