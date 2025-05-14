@@ -41,4 +41,6 @@
     <string name="aceptar">Onartu</string>
     <string name="guardar">Gorde</string>
     <string name="necesitaContraseña">Zure oraingo pasahitza sartu, mesedez</string>
+    <string name="requierePermisosGal">Funtzio honek galeriara sartzeko baimenak behar ditu.</string>
+    <string name="requierePermisosCam">Funtzio honek argazkiak ateratzeko baimenak behar ditu.</string>
 </resources>

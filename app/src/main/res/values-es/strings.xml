@@ -42,4 +42,6 @@
     <string name="aceptar">Aceptar</string>
     <string name="guardar">Guardar</string>
     <string name="necesitaContraseña">Escribe tu contraseña actual</string>
+    <string name="requierePermisosGal">Esta función requiere permisos de galería.</string>
+    <string name="requierePermisosCam">Esta función requiere permisos de galería.</string>
 </resources>

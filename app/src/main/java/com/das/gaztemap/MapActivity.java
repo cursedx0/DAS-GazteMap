@@ -334,7 +334,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             Data datos = new Data.Builder()
                     .putString("url","2") //url a php gestor de monedas
                     .putString("accion", "getpfp") //obtiene monedas de usuario
-                    .putString("nombre", getIntent().getStringExtra("nombre"))
+                    .putString("nombre", nombre)
                     .build();
 
             OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(BDConnector.class)

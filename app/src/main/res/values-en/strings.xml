@@ -41,4 +41,6 @@
     <string name="aceptar">Accept</string>
     <string name="guardar">Save</string>
     <string name="necesitaContraseña">Enter your current password</string>
+    <string name="requierePermisosGal">This function requires gallery permissions.</string>
+    <string name="requierePermisosCam">This function requires cam permissions.</string>
 </resources>
