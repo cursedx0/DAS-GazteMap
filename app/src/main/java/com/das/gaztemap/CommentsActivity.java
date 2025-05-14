@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -35,7 +34,7 @@ public class CommentsActivity extends AppCompatActivity {
     private RecyclerView recyclerViewComments;
     private TextInputEditText editTextComment;
     private FloatingActionButton fabSendComment;
-    private Chip chipSubscribe;
+    private FloatingActionButton fabSubscribe;
 
     private CommentAdapter commentAdapter;
     private List<Comment> commentList;
@@ -43,6 +42,7 @@ public class CommentsActivity extends AppCompatActivity {
     private int currentUserId;
     private String postId;
     private FirebaseMessaging firebaseMessaging;
+    private boolean isSubscribed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,14 +57,14 @@ public class CommentsActivity extends AppCompatActivity {
 
         inicializarVistas();
         cargarComentarios();
-        configurarChipNotificaciones();
+        configurarBotonNotificaciones();
     }
 
     private void inicializarVistas() {
         recyclerViewComments = findViewById(R.id.recyclerViewComments);
         editTextComment = findViewById(R.id.editTextComment);
         fabSendComment = findViewById(R.id.fabSendComment);
-        chipSubscribe = findViewById(R.id.chipSubscribe);
+        fabSubscribe = findViewById(R.id.fabSubscribe);
 
         commentList = new ArrayList<>();
         commentAdapter = new CommentAdapter(this, commentList);
@@ -74,18 +74,28 @@ public class CommentsActivity extends AppCompatActivity {
         fabSendComment.setOnClickListener(v -> enviarComentario());
     }
 
-    private void configurarChipNotificaciones() {
-        Log.d("FCdM", "Intentando suscribir a: post_" + postId);
+    private void configurarBotonNotificaciones() {
+        Log.d("FCM", "Intentando configurar botón para: post_" + postId);
 
-        chipSubscribe.setChecked(estaSubscrito());
+        isSubscribed = estaSubscrito();
 
-        chipSubscribe.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if(isChecked) {
-                suscribirATopic();
-            } else {
+        actualizarIconoSuscripcion();
+
+        fabSubscribe.setOnClickListener(v -> {
+            if(isSubscribed) {
                 desuscribirDeTopic();
+            } else {
+                suscribirATopic();
             }
         });
+    }
+
+    private void actualizarIconoSuscripcion() {
+        if(isSubscribed) {
+            fabSubscribe.setImageResource(R.drawable.notifications_active);
+        } else {
+            fabSubscribe.setImageResource(R.drawable.notifications);
+        }
     }
 
     private boolean estaSubscrito() {
@@ -97,7 +107,12 @@ public class CommentsActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
         editor.putBoolean(SUBSCRIPTION_KEY_PREFIX + postId, subscribed);
         editor.apply();
+
+        isSubscribed = subscribed;
+
+        actualizarIconoSuscripcion();
     }
+
     private void suscribirATopic() {
         Log.d("FCM", "Intentando suscribir a: post_" + postId);
         String topic = "post_" + postId;
@@ -109,7 +124,6 @@ public class CommentsActivity extends AppCompatActivity {
                         Toast.makeText(this, "Notificaciones activadas", Toast.LENGTH_SHORT).show();
                     } else {
                         Log.e("FCM", "Error en suscripción", task.getException());
-                        chipSubscribe.setChecked(false);
                         Toast.makeText(this, "Error al activar notificaciones", Toast.LENGTH_SHORT).show();
                         new Handler(Looper.getMainLooper()).postDelayed(this::suscribirATopic, 2000);
                     }
@@ -124,7 +138,6 @@ public class CommentsActivity extends AppCompatActivity {
                         guardarEstadoSubscripcion(false);
                         Toast.makeText(this, "Notificaciones desactivadas", Toast.LENGTH_SHORT).show();
                     } else {
-                        chipSubscribe.setChecked(true);
                         Toast.makeText(this, "Error al desactivar notificaciones", Toast.LENGTH_SHORT).show();
                         new Handler(Looper.getMainLooper()).postDelayed(this::desuscribirDeTopic, 2000);
                     }

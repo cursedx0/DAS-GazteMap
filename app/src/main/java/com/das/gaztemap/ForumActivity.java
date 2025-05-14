@@ -233,4 +233,5 @@ public class ForumActivity extends AppCompatActivity {
     private void mostrarError(String mensaje) {
         Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show();
     }
+
 }
