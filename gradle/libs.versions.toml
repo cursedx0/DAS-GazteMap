@@ -1,5 +1,6 @@
 [versions]
 agp = "8.8.0"
+androidMapsUtils = "2.2.5"
 firebaseAuth = "23.2.0"
 firebaseBom = "33.13.0"
 firebaseDatabase = "21.0.0"
@@ -25,6 +26,7 @@ preference = "1.2.1"
 volley = "1.2.1"
 
 [libraries]
+android-maps-utils = { module = "com.google.maps.android:android-maps-utils", version.ref = "androidMapsUtils" }
 compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
 firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuth" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }

@@ -36,9 +36,19 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.navigation.NavigationView;
+import com.google.maps.android.data.geojson.GeoJsonFeature;
+import com.google.maps.android.data.geojson.GeoJsonLayer;
+import com.google.maps.android.data.geojson.GeoJsonLineStringStyle;
+import com.google.maps.android.data.geojson.GeoJsonPolygonStyle;
 
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.Map;
 
 import widget.MapAppWidget;
@@ -126,19 +136,73 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 == PackageManager.PERMISSION_GRANTED) {
             enableUserLocation();
         } else {
-            // Mostrar mensaje al usuario
             new AlertDialog.Builder(this)
                     .setTitle("Ubicación desactivada")
                     .setMessage("Por favor, activa la ubicación del móvil para usar esta funcionalidad.")
                     .setPositiveButton("Aceptar", (dialog, which) -> {
-                        // Opcional: Abrir configuración de ubicación
                         Intent intent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                         startActivity(intent);
                     })
                     .setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss())
                     .show();
         }
-        captureMapSnapshot();
+
+        // Centrar el mapa en Vitoria-Gasteiz
+        LatLng vitoria = new LatLng(42.8460, -2.6716);
+        mMap.addMarker(new MarkerOptions().position(vitoria).title("Vitoria-Gasteiz"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(vitoria, 15));
+
+        // Cargar y mostrar las rutas de bici desde el archivo GeoJSON
+        new Thread(() -> {
+            try {
+                URL url = new URL("http://ec2-51-44-167-78.eu-west-3.compute.amazonaws.com/lbilbao040/WEB/GazteMap/viasciclistas23Maps.geojson");
+                Log.d("MapActivity", "Conectando a la URL: " + url.toString());
+                InputStream inputStream = url.openStream();
+                StringBuilder jsonBuilder = new StringBuilder();
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        jsonBuilder.append(line);
+                    }
+                }
+                String geoJsonString = jsonBuilder.toString();
+                Log.d("MapActivity", "Contenido del GeoJSON: " + geoJsonString);
+
+                JSONObject geoJsonData = new JSONObject(geoJsonString);
+                GeoJsonLayer layer = new GeoJsonLayer(mMap, geoJsonData);
+
+                //Estilo para líneas
+                GeoJsonLineStringStyle lineStyle = new GeoJsonLineStringStyle();
+                lineStyle.setColor(Color.RED);
+                lineStyle.setWidth(5);
+
+                // Estilo para polígonos
+                //GeoJsonPolygonStyle polygonStyle = new GeoJsonPolygonStyle();
+                //polygonStyle.setFillColor(Color.BLUE); // Color de relleno
+                //polygonStyle.setStrokeColor(Color.BLACK); // Color del borde
+                //polygonStyle.setStrokeWidth(5); // Grosor del borde
+
+                // Iterar sobre las características
+                for (GeoJsonFeature feature : layer.getFeatures()) {
+                    if (feature.getGeometry() != null) {
+                        String type = feature.getGeometry().getGeometryType();
+                        Log.d("GeoJson", "Tipo de geometría: " + type);
+                        if (type.equals("LineString") || type.equals("MultiLineString")) {
+                            feature.setLineStringStyle(lineStyle);
+                        //} else if (type.equals("Polygon") || type.equals("MultiPolygon")) {
+                        //    feature.setPolygonStyle(polygonStyle);
+                        }
+                    }
+                }
+
+                runOnUiThread(() -> {
+                    layer.addLayerToMap();
+                    Log.d("MapActivity", "Capa GeoJSON añadida al mapa con estilos personalizados.");
+                });
+            } catch (Exception e) {
+                Log.e("MapActivity", "Error al cargar el archivo GeoJSON", e);
+            }
+        }).start();
     }
 
     private void captureMapSnapshot() {
