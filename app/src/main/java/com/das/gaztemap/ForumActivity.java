@@ -145,7 +145,6 @@ public class ForumActivity extends AppCompatActivity {
                             fabCreatePost.show(); // Mostrar el FAB nuevamente
                             loadPosts();
 
-                            // Opcional: desplazar al primer elemento
                             recyclerViewPosts.smoothScrollToPosition(0);
                         }
                     } catch (JSONException e) { e.printStackTrace(); }

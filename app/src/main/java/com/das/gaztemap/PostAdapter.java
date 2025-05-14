@@ -2,6 +2,7 @@ package com.das.gaztemap;
 
 import static com.das.gaztemap.ForumActivity.BASE_URL;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -9,7 +10,9 @@ import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
@@ -33,13 +37,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
     private Context context;
     private List<Post> postList;
-    private DatabaseReference mDatabase;
     private int currentUserId;
 
     public PostAdapter(Context context, List<Post> postList, int currentUserId) {
         this.context = context;
         this.postList = postList;
-        this.mDatabase = FirebaseDatabase.getInstance().getReference();
         this.currentUserId = currentUserId;
     }
 
@@ -85,7 +87,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         if (isMyPost) {
             holder.buttonMore.setOnClickListener(view -> {
                 // mostrar un PopupMenu con opciones como eliminar o editar
-                deletePost(post);
+                showOptionsMenu(post, position, holder.buttonMore);
             });
         }
     }
@@ -179,17 +181,143 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     }
 
     // solo si el usuario es el autor
-    private void deletePost(Post post) {
-        if (String.valueOf(currentUserId).equals(post.getUserId())) {
-            mDatabase.child("posts").child(post.getPostId()).removeValue()
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(context, "Publicación eliminada", Toast.LENGTH_SHORT).show();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(context, "Error al eliminar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
-        } else {
-            Toast.makeText(context, "Solo puedes eliminar tus propias publicaciones", Toast.LENGTH_SHORT).show();
+
+    private void editPost(Post post, int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Editar publicación");
+
+        EditText input = new EditText(context);
+        input.setText(post.getContent());
+        builder.setView(input);
+
+        builder.setPositiveButton("Guardar", (dialog, which) -> {
+            String newContent = input.getText().toString().trim();
+            if(!newContent.isEmpty()) {
+                updatePostContent(post, newContent, position);
+            }
+        });
+
+        builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.cancel());
+        builder.show();
+    }
+
+    private void performDeletePost(Post post, int position) {
+        JSONObject jsonBody = new JSONObject();
+        try {
+            jsonBody.put("accion", "eliminar_hilo");
+            jsonBody.put("post_id", post.getPostId());
+            jsonBody.put("user_id", currentUserId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(context, "Error al crear la solicitud", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.POST,
+                BASE_URL,
+                jsonBody,
+                response -> {
+                    try {
+                        if (response.getString("status").equals("success")) {
+                            // Eliminar de la lista local
+                            postList.remove(position);
+                            // Notificar al adaptador
+                            notifyItemRemoved(position);
+                            // Actualizar posiciones de los elementos siguientes
+                            notifyItemRangeChanged(position, postList.size());
+                            Toast.makeText(context, "Publicación eliminada", Toast.LENGTH_SHORT).show();
+                        } else {
+                            String errorMsg = response.getString("message");
+                            Toast.makeText(context, "Error: " + errorMsg, Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(context, "Error al procesar respuesta", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    Toast.makeText(context, "Error de conexión", Toast.LENGTH_SHORT).show();
+                    post.setLiked(!post.isLiked());
+                    notifyItemChanged(position);
+                }
+        );
+
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                10000, // 10 segundos timeout
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+        Volley.newRequestQueue(context).add(request);
+    }
+
+    private void deletePost(Post post, int position) {
+        new AlertDialog.Builder(context)
+                .setTitle("Eliminar publicación")
+                .setMessage("¿Estás seguro?")
+                .setPositiveButton("Eliminar", (dialog, which) -> performDeletePost(post, position))
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void showOptionsMenu(Post post, int position, View anchorView) {
+        PopupMenu popup = new PopupMenu(context, anchorView);
+        popup.inflate(R.menu.post_options);
+        popup.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.menu_edit) {
+                editPost(post, position);
+                return true;
+            } else if (item.getItemId() == R.id.menu_delete) {
+                deletePost(post, position);
+                return true;
+            }
+            return false;
+        });
+        popup.show();
+    }
+    private void updatePostContent(Post post, String newContent, int position) {
+        JSONObject jsonBody = new JSONObject();
+        try {
+            jsonBody.put("accion", "editar_hilo");
+            jsonBody.put("post_id", post.getPostId());
+            jsonBody.put("user_id", currentUserId);
+            jsonBody.put("contenido", newContent);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(context, "Error al crear la solicitud", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.POST,
+                BASE_URL,
+                jsonBody,
+                response -> {
+                    try {
+                        if (response.getString("status").equals("success")) {
+                            post.setContent(newContent);
+                            notifyItemChanged(position);
+                            Toast.makeText(context, "Publicación actualizada", Toast.LENGTH_SHORT).show();
+                        } else {
+                            String errorMsg = response.getString("message");
+                            Toast.makeText(context, "Error: " + errorMsg, Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(context, "Error al procesar respuesta", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    Toast.makeText(context, "Error de conexión", Toast.LENGTH_SHORT).show();
+                    notifyItemChanged(position);
+                }
+        );
+
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                10000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+        Volley.newRequestQueue(context).add(request);
     }
 }

@@ -64,4 +64,19 @@
     <string name="aceptar">Aceptar</string>
     <string name="guardar">Guardar</string>
     <string name="necesitaContraseña">Escribe tu contraseña actual</string>
+
+
+
+
+    <string name="top_500">Top 500</string>
+    <string name="leaderboard">Compite con otros usuarios y gana puntos</string>
+    <string name="points_cantidad">%d puntos</string>
+    <string name="points_placeholder">0 puntos</string>
+    <string name="rank">Tu posición: #%d</string>
+    <string name="rank_placeholder">Tu posición: #0</string>
+    <string name="historico">Total</string>
+    <string name="mensual">Mensual</string>
+    <string name="semanal">Semanal</string>
+    <string name="diario">Diario</string>
+    <string name="menu">Menú</string>
 </resources>

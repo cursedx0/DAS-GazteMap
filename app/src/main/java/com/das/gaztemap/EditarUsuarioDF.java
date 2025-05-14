@@ -90,7 +90,7 @@ public class EditarUsuarioDF extends DialogFragment {
 
         Data inputData = new Data.Builder()
                 .putString("accion", "editar")
-                .putInt("id",id)
+               // .putInt("id",id)
                 .putString("nombre", nuevoNombre)
                 .putString("email", nuevoEmail)
                 .putString("pw",miPw)

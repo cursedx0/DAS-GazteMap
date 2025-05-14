@@ -303,6 +303,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             navigationView.setCheckedItem(R.id.Amigos);
             startActivity(intent);
         } else if (id == R.id.Top500) {
+                Intent intent = new Intent(MapActivity.this, LeaderboardActivity.class);
+                intent.putExtra("nombre", nombre);
+                intent.putExtra("email", email);
+                startActivity(intent);
         } else if (id == R.id.Foro){
             Intent intent = new Intent(MapActivity.this, ForumActivity.class);
             NavigationView navigationView = findViewById(R.id.nav_view);
