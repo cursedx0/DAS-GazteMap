@@ -6,7 +6,9 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -17,6 +19,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Patterns;
@@ -109,7 +112,7 @@ public class EditarUsuarioDF extends DialogFragment {
         obtenerPfpNav();
 
         //--LÓGICA DE CAMARA Y GALERÍA--\\
-        /*
+
         permissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestMultiplePermissions(),
                 result -> {
@@ -139,7 +142,7 @@ public class EditarUsuarioDF extends DialogFragment {
                         Uri imageUri = result.getData().getData();
                         selectedGalleryImageUri = imageUri;
 
-                        String path = uri2path(this, imageUri);
+                        String path = uri2path(requireContext(), imageUri);
                         if (path != null) {
                             currentPhotoPath = path;
                             subirPfp();
@@ -177,7 +180,7 @@ public class EditarUsuarioDF extends DialogFragment {
             String[] permissions = getStoragePermissions();
             boolean allGranted = true;
             for (String perm : permissions) {
-                if (ContextCompat.checkSelfPermission(this, perm) != PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(requireContext(), perm) != PackageManager.PERMISSION_GRANTED) {
                     allGranted = false;
                     break;
                 }
@@ -189,7 +192,7 @@ public class EditarUsuarioDF extends DialogFragment {
                 abrirGaleria();
             }
         });
-        */
+
 
         return dialog;
     }
@@ -300,17 +303,17 @@ public class EditarUsuarioDF extends DialogFragment {
         }
     }
 
-    /*
+
     private void lanzarCamara(){
         Log.d("CAM MANAGER", "CLICK");
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null || true) {
+        if (takePictureIntent.resolveActivity(requireContext().getPackageManager()) != null || true) {
             Log.d("CAM MANAGER", "ENTRA");
             File photoFile = null;
             try {
                 String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
                 String imageFileName = "JPEG_" + timeStamp + "_";
-                File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                File storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                 photoFile = File.createTempFile(
                         imageFileName,
                         ".jpg",
@@ -323,8 +326,8 @@ public class EditarUsuarioDF extends DialogFragment {
                 ex.printStackTrace();
             }
             if (photoFile != null) {
-                Uri fotoUri = FileProvider.getUriForFile(ProfileActivity.this,
-                        getApplicationContext().getPackageName() + ".provider",
+                Uri fotoUri = FileProvider.getUriForFile(requireContext(),
+                        requireContext().getPackageName() + ".provider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, fotoUri);
                 cameraLauncher.launch(takePictureIntent);
@@ -353,26 +356,27 @@ public class EditarUsuarioDF extends DialogFragment {
 
     private void subirPfp(){
         Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
-        pfp.setImageBitmap(bitmap);
+        imgPerfil.setImageBitmap(bitmap);
 
-        if(id>0) {
+        if(nombre!=null) {
             //String laimagen = Base64.encodeToString(imageBytes, Base64.DEFAULT);
             Data datos = new Data.Builder()
                     .putString("url","2") //url a php gestor de pfps
                     .putString("accion", "setpfp") //obtiene monedas de usuario
-                    .putInt("id",id)
+                    //.putInt("id",id)
+                    .putString("nombre",nombre)
                     .putString("pic", currentPhotoPath) //se le pasa la ruta porque la imagen en sí es demasiado grande
                     .build();
 
-            OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(conexionBDWebService.class)
+            OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(BDConnector.class)
                     .setInputData(datos)
                     .build();
 
-            WorkManager.getInstance(ProfileActivity.this).enqueue(request);
+            WorkManager.getInstance(requireContext()).enqueue(request);
 
-            WorkManager.getInstance(getApplicationContext())
+            WorkManager.getInstance(requireContext())
                     .getWorkInfoByIdLiveData(request.getId())
-                    .observe(ProfileActivity.this, workInfo -> {
+                    .observe(this, workInfo -> {
                         if (workInfo != null && workInfo.getState().isFinished()) {
                             if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
                                 String mensaje = workInfo.getOutputData().getString("message");
@@ -384,12 +388,17 @@ public class EditarUsuarioDF extends DialogFragment {
                                     if (url != null) {
                                         Glide.with(this)
                                                 .load(urlConId)
-                                                .placeholder(R.drawable.icono_rombo)
+                                                .placeholder(R.drawable.placeholder)
                                                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                                                 .skipMemoryCache(true)
-                                                .into(pfp);
+                                                .into(imgPerfil);
+                                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+                                        SharedPreferences.Editor editor = prefs.edit();
+                                        editor.putString("lastPfp", urlConId);
+                                        editor.apply();
+                                        Toast.makeText(requireContext(),getString(R.string.cambiosTardan), Toast.LENGTH_LONG).show();
                                     } else {
-                                        pfp.setImageResource(R.drawable.icono_rombo);
+                                        imgPerfil.setImageResource(R.drawable.placeholder);
                                     }
                                 } else {
                                     Log.d("OBTENER IMAGEN", "FALLÓ con código: " + code);
@@ -400,7 +409,7 @@ public class EditarUsuarioDF extends DialogFragment {
                         }
                     });
         }else{
-            Toast.makeText(getApplicationContext(), getString(R.string.masCampos), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.faltanCampos), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -418,6 +427,11 @@ public class EditarUsuarioDF extends DialogFragment {
             return new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
         }
     }
-        */
+
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog) {
+        Toast.makeText(requireContext(),getString(R.string.cambiosTardan), Toast.LENGTH_LONG).show();
+        super.onDismiss(dialog);
+    }
 }
 

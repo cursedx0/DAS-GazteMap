@@ -1,8 +1,11 @@
 package com.das.gaztemap;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
 
@@ -44,9 +47,9 @@ public class BDConnector extends Worker {
                 Log.d("WORKER", "Usando url por defecto.");
                 direccion = "http://51.44.167.78:80/lbilbao040/WEB/GazteMap/api.php"; //POR DEFECTO
             }else if(getInputData().getString("url").equals("1")){
-                direccion = "http://51.44.167.78:80/lbilbao040/WEB/GazteMap/amigos.php"; //monedas
+                direccion = "http://51.44.167.78:80/lbilbao040/WEB/GazteMap/amigos.php"; //amigos
             }else if(getInputData().getString("url").equals("2")){
-                direccion = "http://51.44.167.78:80/lbilbao040/WEB/GazteMap/pfp.php"; //monedas
+                direccion = "http://51.44.167.78:80/lbilbao040/WEB/GazteMap/pfp.php"; //pfps
             }else {
                 direccion = getInputData().getString("url");
             }
@@ -670,7 +673,7 @@ public class BDConnector extends Worker {
                         JSONObject jsonParam = new JSONObject();
                         jsonParam.put("accion", accion);
 
-                        if(getInputData().getInt("id",0)!=0 && getInputData().getString("pic")!=null){
+                        if(getInputData().getString("nombre")!=null && getInputData().getString("pic")!=null){
                             String imagePath = getInputData().getString("pic");
                             File imageFile = new File(imagePath);
                             Log.d("WORKER","11111111111111");
@@ -682,7 +685,7 @@ public class BDConnector extends Worker {
                                 Log.d("WORKER","22222222222222");
                                 String base64Image = Base64.encodeToString(imageBytes, Base64.DEFAULT);
                                 Log.d("WORKER","3333333333333");
-                                jsonParam.put("id", getInputData().getInt("id", 0));
+                                jsonParam.put("usuario", getInputData().getString("nombre"));
                                 jsonParam.put("pic", base64Image);
                                 paramsValidos = true;
                                 Log.d("WORKER","4444444444444");

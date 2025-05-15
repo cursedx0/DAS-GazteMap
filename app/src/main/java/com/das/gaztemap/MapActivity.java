@@ -77,6 +77,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private String nombre;
     private String email;
     private ShapeableImageView imgPerfil;
+    private String lastPfp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -387,6 +388,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void onResume(){
         super.onResume();
         navigationView.setCheckedItem(R.id.Viajar);
+        if(lastPfp!=null) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MapActivity.this);
+            String lp = prefs.getString("lastPfp", "error");
+            if (!lastPfp.equals(lp)) {
+                obtenerPfpNav();
+            }
+        }
     }
 
     public void obtenerPfpNav(){
@@ -428,6 +436,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                                                 .skipMemoryCache(true)
                                                 .into(imgPerfil); // Tu ImageView
+                                        lastPfp = urlConId;
                                     }else{
                                         imgPerfil.setImageResource(R.drawable.placeholder);
                                     }
