@@ -37,8 +37,9 @@
                         android:layout_height="wrap_content"
                         android:text="@string/top_500"
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold" />
+                        android:textColor="@color/blanco"
+                        android:textStyle="bold"
+                        android:layout_marginStart="56dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -46,7 +47,8 @@
                         android:layout_marginTop="4dp"
                         android:text="@string/leaderboard"
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-                        android:textColor="@android:color/white" />
+                        android:textColor="@color/blanco"
+                        android:layout_marginStart="56dp" />
 
                     <androidx.cardview.widget.CardView
                         android:id="@+id/current_user_rank_card"
@@ -63,7 +65,7 @@
                             android:padding="12dp">
 
                             <com.google.android.material.imageview.ShapeableImageView
-                                android:id="@+id/user_profile_image"
+                                android:id="@+id/imgPerfil"
                                 android:layout_width="60dp"
                                 android:layout_height="60dp"
                                 android:scaleType="centerCrop"
@@ -102,18 +104,39 @@
                 android:id="@+id/tab_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:tabTextColor="@android:color/white"
-                app:tabSelectedTextColor="@android:color/white"/>
+                app:tabTextColor="@color/texto_principal"
+                app:tabSelectedTextColor="@color/azul_clarito"/>
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_leaderboard"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:padding="8dp"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_leaderboard"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:padding="8dp"
+                android:visibility="gone"/>
+
+            <ProgressBar
+                android:id="@+id/loading_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/empty_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                android:visibility="gone"/>
+        </FrameLayout>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/menu_button"

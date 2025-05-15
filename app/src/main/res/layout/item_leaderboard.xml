@@ -15,7 +15,6 @@
         android:orientation="horizontal"
         android:padding="12dp">
 
-        <!-- Rank Section -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_rank"
             android:layout_width="48dp"
@@ -49,9 +48,8 @@
             </FrameLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Profile Image -->
         <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/profile_image"
+            android:id="@+id/imgPerfil"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_gravity="center_vertical"
@@ -60,7 +58,6 @@
             android:src="@drawable/placeholder"
             app:shapeAppearanceOverlay="@style/Circulo" />
 
-        <!-- User Info -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"

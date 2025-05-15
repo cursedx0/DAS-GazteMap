@@ -50,7 +50,10 @@
                 android:layout_marginStart="16dp"
                 android:src="@drawable/send"
                 app:backgroundTint="@color/azul_600"
-                app:tint="@color/white"/>
+                app:tint="@color/white"
+                app:elevation="0dp"
+                android:elevation="0dp"/>
+
         </LinearLayout>
     </LinearLayout>
 
