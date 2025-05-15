@@ -51,6 +51,7 @@ import com.google.maps.android.data.geojson.GeoJsonLineString;
 import com.google.maps.android.data.geojson.GeoJsonLineStringStyle;
 import com.google.maps.android.data.geojson.GeoJsonPolygonStyle;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -63,6 +64,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import widget.MapAppWidget;
 
@@ -312,16 +315,87 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     private void loadWalkingRoute(LatLng userLocation, LatLng destination) {
-        runOnUiThread(() -> {
-            // linea recta xd
-            PolylineOptions walkingRoute = new PolylineOptions()
-                    .add(userLocation, destination)
-                    .width(10)
-                    .color(Color.BLUE);
-            mMap.addPolyline(walkingRoute);
+        new Thread(() -> {
+            try {
+                // Construir la URL para la API de Google Directions
+                String apiKey = "AIzaSyBBeagiyy4wY0h1RnbKgoK7kpadmYAhU1o"; // Asegúrate de tener tu API Key en strings.xml
+                String url = "https://maps.googleapis.com/maps/api/directions/json?origin="
+                        + userLocation.latitude + "," + userLocation.longitude
+                        + "&destination=" + destination.latitude + "," + destination.longitude
+                        + "&mode=walking&key=" + apiKey;
 
-            Toast.makeText(MapActivity.this, getString(R.string.patita), Toast.LENGTH_SHORT).show();
-        });
+                // Realizar la solicitud HTTP
+                OkHttpClient client = new OkHttpClient();
+                Request request = new Request.Builder().url(url).build();
+                Response response = client.newCall(request).execute();
+
+                if (response.isSuccessful()) {
+                    String responseData = response.body().string();
+                    JSONObject jsonResponse = new JSONObject(responseData);
+
+                    // Verificar si hay rutas disponibles
+                    if ("OK".equals(jsonResponse.getString("status"))) {
+                        JSONArray routes = jsonResponse.getJSONArray("routes");
+                        JSONObject route = routes.getJSONObject(0);
+                        JSONObject overviewPolyline = route.getJSONObject("overview_polyline");
+                        String encodedPolyline = overviewPolyline.getString("points");
+
+                        // Decodificar la polilínea
+                        List<LatLng> path = decodePolyline(encodedPolyline);
+
+                        // Dibujar la ruta en el mapa
+                        runOnUiThread(() -> {
+                            PolylineOptions polylineOptions = new PolylineOptions()
+                                    .addAll(path)
+                                    .width(10)
+                                    .color(Color.BLUE);
+                            mMap.addPolyline(polylineOptions);
+                            Toast.makeText(MapActivity.this, "Ruta a pie calculada.", Toast.LENGTH_SHORT).show();
+                        });
+                    } else {
+                        runOnUiThread(() -> Toast.makeText(MapActivity.this, "No hay rutas disponibles.", Toast.LENGTH_SHORT).show());
+                    }
+                } else {
+                    runOnUiThread(() -> Toast.makeText(MapActivity.this, "Error al obtener la ruta.", Toast.LENGTH_SHORT).show());
+                }
+            } catch (Exception e) {
+                Log.e("MapActivity", "Error al calcular la ruta a pie", e);
+                runOnUiThread(() -> Toast.makeText(MapActivity.this, "Error al calcular la ruta a pie.", Toast.LENGTH_SHORT).show());
+            }
+        }).start();
+    }
+
+    // Metodo para decodificar una polilínea codificada
+    private List<LatLng> decodePolyline(String encoded) {
+        List<LatLng> poly = new ArrayList<>();
+        int index = 0, len = encoded.length();
+        int lat = 0, lng = 0;
+
+        while (index < len) {
+            int b, shift = 0, result = 0;
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lat += dlat;
+
+            shift = 0;
+            result = 0;
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lng += dlng;
+
+            LatLng p = new LatLng(((double) lat / 1E5), ((double) lng / 1E5));
+            poly.add(p);
+        }
+
+        return poly;
     }
 
     private void loadBusRoute(LatLng userLocation, LatLng destination) {
@@ -365,7 +439,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         updateTransportIcon();
     }
 
-    // Método para calcular la distancia entre dos puntos
+    // Metodo para calcular la distancia entre dos puntos
     private double calculateDistance(LatLng start, LatLng end) {
         double earthRadius = 6371; // Radio de la Tierra en km
         double dLat = Math.toRadians(end.latitude - start.latitude);
