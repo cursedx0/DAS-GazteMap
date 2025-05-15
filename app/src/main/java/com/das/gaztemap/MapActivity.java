@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.Manifest;
 import android.widget.Toast;
@@ -82,6 +83,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private String lastPfp;
     private TextView txtNombre, txtEmail;
 
+    private FloatingActionButton transportButton;
+    private LinearLayout transportOptions;
+    private LinearLayout optionWalking, optionBus, optionBicycle;
+    private String selectedTransportMode = "bicycle"; // valor por defecto
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -120,6 +126,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             startActivity(logout);
 
         });
+
+
+
         // botón para abrir el menú lateral
         FloatingActionButton menuButton = findViewById(R.id.menu_button);
         menuButton.setOnClickListener(view -> {
@@ -130,6 +139,43 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             }
         });
 
+        transportButton = findViewById(R.id.transport_button);
+        transportOptions = findViewById(R.id.transport_options);
+        optionWalking = findViewById(R.id.option_walking);
+        optionBus = findViewById(R.id.option_bus);
+        optionBicycle = findViewById(R.id.option_bicycle);
+
+        // botón de transporte para mostrar/ocultar opciones
+        transportButton.setOnClickListener(view -> {
+            if (transportOptions.getVisibility() == View.VISIBLE) {
+                transportOptions.setVisibility(View.GONE);
+            } else {
+                transportOptions.setVisibility(View.VISIBLE);
+            }
+        });
+
+        //  listeners de cada opción de transporte
+        optionWalking.setOnClickListener(view -> {
+            selectedTransportMode = "walking";
+            transportOptions.setVisibility(View.GONE);
+            updateTransportIcon();
+            recalculateRoute();
+        });
+
+        optionBus.setOnClickListener(view -> {
+            selectedTransportMode = "bus";
+            transportOptions.setVisibility(View.GONE);
+            updateTransportIcon();
+            recalculateRoute();
+        });
+
+        optionBicycle.setOnClickListener(view -> {
+            selectedTransportMode = "bicycle";
+            transportOptions.setVisibility(View.GONE);
+            updateTransportIcon();
+            recalculateRoute();
+        });
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         if (mapFragment != null) {
@@ -137,7 +183,153 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         }
     }
 
-    // Encuentra el nodo más cercano al usuario
+    private void updateTransportIcon() {
+        switch (selectedTransportMode) {
+            case "walking":
+                transportButton.setImageResource(R.drawable.steps_40px);
+                break;
+            case "bus":
+                transportButton.setImageResource(R.drawable.directions_bus_40px);
+                break;
+            case "bicycle":
+                transportButton.setImageResource(R.drawable.pedal_bike_40px);
+                break;
+        }
+    }
+
+    private void recalculateRoute() {
+        if (mMap == null) return;
+
+        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+            if (location != null) {
+                LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                LatLng destination = new LatLng(42.8394805013312, -2.670361262280153); // Ubicación de la UPV
+
+                mMap.clear();
+                mMap.addMarker(new MarkerOptions().position(userLocation).title("Tu ubicación"));
+                mMap.addMarker(new MarkerOptions().position(destination).title("Destino"));
+
+                // Dependiendo del modo de transporte, cargar rutas diferentes
+                switch (selectedTransportMode) {
+                    case "bicycle":
+                        loadBicycleRoute(userLocation, destination);
+                        break;
+                    case "walking":
+                        loadWalkingRoute(userLocation, destination);
+                        break;
+                    case "bus":
+                        loadBusRoute(userLocation, destination);
+                        break;
+                }
+            }
+        });
+    }
+
+    private void loadBicycleRoute(LatLng userLocation, LatLng destination) {
+        new Thread(() -> {
+            try {
+                URL url = new URL("http://ec2-51-44-167-78.eu-west-3.compute.amazonaws.com/lbilbao040/WEB/GazteMap/viasciclistas23Maps.geojson");
+                InputStream inputStream = url.openStream();
+                StringBuilder jsonBuilder = new StringBuilder();
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        jsonBuilder.append(line);
+                    }
+                }
+                String geoJsonString = jsonBuilder.toString();
+                JSONObject geoJsonData = new JSONObject(geoJsonString);
+                GeoJsonLayer layer = new GeoJsonLayer(mMap, geoJsonData);
+
+                Graph graph = new Graph();
+                for (GeoJsonFeature feature : layer.getFeatures()) {
+                    if (feature.getGeometry() != null && feature.getGeometry().getGeometryType().equals("LineString")) {
+                        List<LatLng> points = ((GeoJsonLineString) feature.getGeometry()).getCoordinates();
+                        for (int i = 0; i < points.size() - 1; i++) {
+                            LatLng start = points.get(i);
+                            LatLng end = points.get(i + 1);
+                            double distance = calculateDistance(start, end);
+                            graph.addEdge(start, end, distance);
+                        }
+                    }
+                }
+
+                // Encuentra el nodo más cercano al usuario
+                LatLng nearestNode = findNearestNode(userLocation, graph);
+                Log.d("NearestNodeDebug", "Nearest node to user: " + nearestNode);
+
+                // Encuentra el nodo más cercano a la UPV
+                LatLng nearestToDestination = findNearestNode(destination, graph);
+                Log.d("NearestNodeDebug", "Nearest node to destination: " + nearestToDestination);
+
+                // Calcula la ruta más corta desde el nodo más cercano
+                List<LatLng> shortestPath = graph.getShortestPath(nearestNode, nearestToDestination);
+                Log.d("ShortestPathDebug", "Shortest path: " + shortestPath);
+
+                runOnUiThread(() -> {
+                    for (GeoJsonFeature feature : layer.getFeatures()) {
+                        if (feature.getGeometry() != null && feature.getGeometry().getGeometryType().equals("LineString")) {
+                            List<LatLng> points = ((GeoJsonLineString) feature.getGeometry()).getCoordinates();
+
+                            for (int i = 0; i < points.size() - 1; i++) {
+                                LatLng start = points.get(i);
+                                LatLng end = points.get(i + 1);
+
+                                // Verificar si el segmento (start -> end) está en el shortestPath
+                                boolean isPartOfShortestPath = false;
+                                for (int j = 0; j < shortestPath.size() - 1; j++) {
+                                    LatLng pathStart = shortestPath.get(j);
+                                    LatLng pathEnd = shortestPath.get(j + 1);
+
+                                    if ((start.equals(pathStart) && end.equals(pathEnd)) ||
+                                            (start.equals(pathEnd) && end.equals(pathStart))) {
+                                        isPartOfShortestPath = true;
+                                        break;
+                                    }
+                                }
+
+                                // Dibujar solo el segmento necesario
+                                PolylineOptions segmentPolyline = new PolylineOptions()
+                                        .add(start, end)
+                                        .width(10)
+                                        .color(isPartOfShortestPath ? Color.GREEN : Color.RED);
+
+                                mMap.addPolyline(segmentPolyline);
+                            }
+                        }
+                    }
+                });
+
+            } catch (Exception e) {
+                Log.e("MapActivity", "Error al procesar el GeoJsonLayer", e);
+            }
+        }).start();
+    }
+
+    private void loadWalkingRoute(LatLng userLocation, LatLng destination) {
+        runOnUiThread(() -> {
+            // linea recta xd
+            PolylineOptions walkingRoute = new PolylineOptions()
+                    .add(userLocation, destination)
+                    .width(10)
+                    .color(Color.BLUE);
+            mMap.addPolyline(walkingRoute);
+
+            Toast.makeText(MapActivity.this, getString(R.string.patita), Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void loadBusRoute(LatLng userLocation, LatLng destination) {
+        runOnUiThread(() -> {
+            Toast.makeText(MapActivity.this, getString(R.string.bus), Toast.LENGTH_SHORT).show();
+        });
+    }
+
     private LatLng findNearestNode(LatLng userLocation, Graph graph) {
         LatLng nearestNode = null;
         double minDistance = Double.MAX_VALUE;
@@ -169,96 +361,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         LatLng vitoria = new LatLng(42.8460, -2.6716);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(vitoria, 15));
 
-        new Thread(() -> {
-            try {
-                URL url = new URL("http://ec2-51-44-167-78.eu-west-3.compute.amazonaws.com/lbilbao040/WEB/GazteMap/viasciclistas23Maps.geojson");
-                InputStream inputStream = url.openStream();
-                StringBuilder jsonBuilder = new StringBuilder();
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        jsonBuilder.append(line);
-                    }
-                }
-                String geoJsonString = jsonBuilder.toString();
-                JSONObject geoJsonData = new JSONObject(geoJsonString);
-                GeoJsonLayer layer = new GeoJsonLayer(mMap, geoJsonData);
-
-                Graph graph = new Graph();
-                for (GeoJsonFeature feature : layer.getFeatures()) {
-                    if (feature.getGeometry() != null && feature.getGeometry().getGeometryType().equals("LineString")) {
-                        List<LatLng> points = ((GeoJsonLineString) feature.getGeometry()).getCoordinates();
-                        for (int i = 0; i < points.size() - 1; i++) {
-                            LatLng start = points.get(i);
-                            LatLng end = points.get(i + 1);
-                            double distance = calculateDistance(start, end);
-                            graph.addEdge(start, end, distance);
-                        }
-                    }
-                }
-
-                FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-                fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
-                    if (location != null) {
-                        LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                        LatLng upvLocation = new LatLng(42.8394805013312, -2.670361262280153);
-
-                        // Encuentra el nodo más cercano al usuario
-                        LatLng nearestNode = findNearestNode(userLocation, graph);
-                        Log.d("NearestNodeDebug", "Nearest node to user: " + nearestNode);
-
-                        // Encuentra el nodo más cercano a la UPV
-                        LatLng nearestToDestination = findNearestNode(upvLocation, graph);
-                        Log.d("NearestNodeDebug", "Nearest node to destination: " + nearestToDestination);
-
-                        // Calcula la ruta más corta desde el nodo más cercano
-                        List<LatLng> shortestPath = graph.getShortestPath(nearestNode, nearestToDestination);
-                        Log.d("ShortestPathDebug", "Shortest path: " + shortestPath);
-
-                        runOnUiThread(() -> {
-                            PolylineOptions shortestPathPolyline = new PolylineOptions()
-                                    .width(10)
-                                    .color(Color.GREEN);
-
-                            for (GeoJsonFeature feature : layer.getFeatures()) {
-                                if (feature.getGeometry() != null && feature.getGeometry().getGeometryType().equals("LineString")) {
-                                    List<LatLng> points = ((GeoJsonLineString) feature.getGeometry()).getCoordinates();
-
-                                    for (int i = 0; i < points.size() - 1; i++) {
-                                        LatLng start = points.get(i);
-                                        LatLng end = points.get(i + 1);
-
-                                        // Verificar si el segmento (start -> end) está en el shortestPath
-                                        boolean isPartOfShortestPath = false;
-                                        for (int j = 0; j < shortestPath.size() - 1; j++) {
-                                            LatLng pathStart = shortestPath.get(j);
-                                            LatLng pathEnd = shortestPath.get(j + 1);
-
-                                            if ((start.equals(pathStart) && end.equals(pathEnd)) ||
-                                                    (start.equals(pathEnd) && end.equals(pathStart))) {
-                                                isPartOfShortestPath = true;
-                                                break;
-                                            }
-                                        }
-
-                                        // Dibujar solo el segmento necesario
-                                        PolylineOptions segmentPolyline = new PolylineOptions()
-                                                .add(start, end)
-                                                .width(10)
-                                                .color(isPartOfShortestPath ? Color.GREEN : Color.RED);
-
-                                        mMap.addPolyline(segmentPolyline);
-                                    }
-                                }
-                            }
-                        });
-                    }
-                });
-
-            } catch (Exception e) {
-                Log.e("MapActivity", "Error al procesar el GeoJsonLayer", e);
-            }
-        }).start();
+        // Iniciar (bicicleta)
+        updateTransportIcon();
     }
 
     // Método para calcular la distancia entre dos puntos
@@ -316,6 +420,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
                     mMap.addMarker(new MarkerOptions().position(userLocation).title("Tu ubicación"));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
+
+                    // Calcular ruta inicial con el modo de transporte predeterminado
+                    recalculateRoute();
                 } else {
                     Toast.makeText(this, "No se pudo obtener la ubicación actual.", Toast.LENGTH_SHORT).show();
                 }
@@ -349,7 +456,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     @Override
     public void onBackPressed() {
-        // Cerrar el drawer si está abierto cuando se presiona atrás
+        if (transportOptions.getVisibility() == View.VISIBLE) {
+            transportOptions.setVisibility(View.GONE);
+            return;
+        }
+
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
