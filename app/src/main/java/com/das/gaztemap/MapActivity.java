@@ -40,11 +40,13 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.maps.android.data.geojson.GeoJsonFeature;
 import com.google.maps.android.data.geojson.GeoJsonLayer;
+import com.google.maps.android.data.geojson.GeoJsonLineString;
 import com.google.maps.android.data.geojson.GeoJsonLineStringStyle;
 import com.google.maps.android.data.geojson.GeoJsonPolygonStyle;
 
@@ -56,6 +58,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 
 import widget.MapAppWidget;
@@ -141,27 +144,32 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 == PackageManager.PERMISSION_GRANTED) {
             enableUserLocation();
         } else {
-            new AlertDialog.Builder(this)
-                    .setTitle("Ubicación desactivada")
-                    .setMessage("Por favor, activa la ubicación del móvil para usar esta funcionalidad.")
-                    .setPositiveButton("Aceptar", (dialog, which) -> {
-                        Intent intent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        startActivity(intent);
-                    })
-                    .setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss())
-                    .show();
+            // Solicitar permisos si no se han solicitado antes
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                new AlertDialog.Builder(this)
+                        .setTitle("Ubicación desactivada")
+                        .setMessage("Por favor, activa la ubicación del móvil para usar esta funcionalidad.")
+                        .setPositiveButton("Aceptar", (dialog, which) -> {
+                            Intent intent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            startActivity(intent);
+                        })
+                        .setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss())
+                        .show();
+            } else {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        LOCATION_PERMISSION_REQUEST_CODE);
+            }
         }
 
         // Centrar el mapa en Vitoria-Gasteiz
         LatLng vitoria = new LatLng(42.8460, -2.6716);
-        mMap.addMarker(new MarkerOptions().position(vitoria).title("Vitoria-Gasteiz"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(vitoria, 15));
 
-        // Cargar y mostrar las rutas de bici desde el archivo GeoJSON
+        // Cargar y procesar el GeoJsonLayer
         new Thread(() -> {
             try {
                 URL url = new URL("http://ec2-51-44-167-78.eu-west-3.compute.amazonaws.com/lbilbao040/WEB/GazteMap/viasciclistas23Maps.geojson");
-                Log.d("MapActivity", "Conectando a la URL: " + url.toString());
                 InputStream inputStream = url.openStream();
                 StringBuilder jsonBuilder = new StringBuilder();
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -171,43 +179,83 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     }
                 }
                 String geoJsonString = jsonBuilder.toString();
-                Log.d("MapActivity", "Contenido del GeoJSON: " + geoJsonString);
-
                 JSONObject geoJsonData = new JSONObject(geoJsonString);
                 GeoJsonLayer layer = new GeoJsonLayer(mMap, geoJsonData);
 
-                //Estilo para líneas
-                GeoJsonLineStringStyle lineStyle = new GeoJsonLineStringStyle();
-                lineStyle.setColor(Color.RED);
-                lineStyle.setWidth(5);
-
-                // Estilo para polígonos
-                //GeoJsonPolygonStyle polygonStyle = new GeoJsonPolygonStyle();
-                //polygonStyle.setFillColor(Color.BLUE); // Color de relleno
-                //polygonStyle.setStrokeColor(Color.BLACK); // Color del borde
-                //polygonStyle.setStrokeWidth(5); // Grosor del borde
-
-                // Iterar sobre las características
+                // Construir el grafo desde el GeoJsonLayer
+                Graph graph = new Graph();
                 for (GeoJsonFeature feature : layer.getFeatures()) {
-                    if (feature.getGeometry() != null) {
-                        String type = feature.getGeometry().getGeometryType();
-                        Log.d("GeoJson", "Tipo de geometría: " + type);
-                        if (type.equals("LineString") || type.equals("MultiLineString")) {
-                            feature.setLineStringStyle(lineStyle);
-                        //} else if (type.equals("Polygon") || type.equals("MultiPolygon")) {
-                        //    feature.setPolygonStyle(polygonStyle);
+                    if (feature.getGeometry() != null && feature.getGeometry().getGeometryType().equals("LineString")) {
+                        List<LatLng> points = ((GeoJsonLineString) feature.getGeometry()).getCoordinates();
+                        for (int i = 0; i < points.size() - 1; i++) {
+                            LatLng start = points.get(i);
+                            LatLng end = points.get(i + 1);
+                            double distance = calculateDistance(start, end);
+                            graph.addEdge(start, end, distance);
                         }
                     }
                 }
 
-                runOnUiThread(() -> {
-                    layer.addLayerToMap();
-                    Log.d("MapActivity", "Capa GeoJSON añadida al mapa con estilos personalizados.");
+                // Obtener la ubicación del usuario
+                FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+                fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+                    if (location != null) {
+                        LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                        LatLng upvLocation = new LatLng(42.8492, -2.6725); // Coordenadas de la UPV
+
+                        // Calcular la ruta más corta
+                        List<LatLng> shortestPath = graph.getShortestPath(userLocation, upvLocation);
+
+                        // Dibujar el layer
+                        runOnUiThread(() -> {
+                            for (GeoJsonFeature feature : layer.getFeatures()) {
+                                if (feature.getGeometry() != null && feature.getGeometry().getGeometryType().equals("LineString")) {
+                                    List<LatLng> points = ((GeoJsonLineString) feature.getGeometry()).getCoordinates();
+                                    PolylineOptions polylineOptions = new PolylineOptions()
+                                            .addAll(points)
+                                            .width(10);
+
+                                    // Verificar si la línea forma parte del camino más corto
+                                    boolean isPartOfShortestPath = false;
+                                    for (int i = 0; i < points.size() - 1; i++) {
+                                        LatLng start = points.get(i);
+                                        LatLng end = points.get(i + 1);
+                                        if (shortestPath.contains(start) && shortestPath.contains(end)) {
+                                            isPartOfShortestPath = true;
+                                            break;
+                                        }
+                                    }
+
+                                    // Establecer el color según corresponda
+                                    if (isPartOfShortestPath) {
+                                        polylineOptions.color(Color.GREEN);
+                                    } else {
+                                        polylineOptions.color(Color.RED);
+                                    }
+
+                                    mMap.addPolyline(polylineOptions);
+                                }
+                            }
+                        });
+                    }
                 });
+
             } catch (Exception e) {
-                Log.e("MapActivity", "Error al cargar el archivo GeoJSON", e);
+                Log.e("MapActivity", "Error al procesar el GeoJsonLayer", e);
             }
         }).start();
+    }
+
+    // Método para calcular la distancia entre dos puntos
+    private double calculateDistance(LatLng start, LatLng end) {
+        double earthRadius = 6371; // Radio de la Tierra en km
+        double dLat = Math.toRadians(end.latitude - start.latitude);
+        double dLng = Math.toRadians(end.longitude - start.longitude);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(start.latitude)) * Math.cos(Math.toRadians(end.latitude)) *
+                        Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return earthRadius * c;
     }
 
     private void captureMapSnapshot() {
@@ -246,10 +294,22 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
 
-            // Configurar la cámara y agregar un marcador en Moyúa
-            LatLng moyua = new LatLng(43.2630, -2.9350);
-            mMap.addMarker(new MarkerOptions().position(moyua).title("Moyúa"));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(moyua, 15));
+            // Obtener la última ubicación conocida
+            FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+            fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+                if (location != null) {
+                    LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                    mMap.addMarker(new MarkerOptions().position(userLocation).title("Tu ubicación"));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
+                } else {
+                    Toast.makeText(this, "No se pudo obtener la ubicación actual.", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(e -> {
+                Log.e("MapActivity", "Error al obtener la ubicación", e);
+                Toast.makeText(this, "Error al obtener la ubicación.", Toast.LENGTH_SHORT).show();
+            });
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
         }
     }
 
