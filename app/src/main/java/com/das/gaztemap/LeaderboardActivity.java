@@ -68,13 +68,24 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
     private ProgressBar loadingView;
     private RequestQueue requestQueue;
 
+    private static final String KEY_USER_LIST = "user_list";
+    private static final String KEY_SELECTED_TAB = "selected_tab";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_leaderboard);
 
-        requestQueue = Volley.newRequestQueue(this);
+        if (savedInstanceState != null) {
+            userList = (ArrayList<LeaderboardUser>) savedInstanceState.getSerializable(KEY_USER_LIST);
+            int selectedTab = savedInstanceState.getInt(KEY_SELECTED_TAB, 0);
+            if (tabLayout != null && selectedTab < tabLayout.getTabCount()) {
+                tabLayout.getTabAt(selectedTab).select();
+            }
+        }
 
+        requestQueue = Volley.newRequestQueue(this);
         nombre = getIntent().getStringExtra("nombre");
         email = getIntent().getStringExtra("email");
 
@@ -100,6 +111,14 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
             tabLayout.addTab(tabLayout.newTab().setText(R.string.diario));
         }
 
+        if (userList.isEmpty() && savedInstanceState == null) {
+            loadLeaderboardData(tabLayout.getSelectedTabPosition());
+            loadCurrentUserRank();
+        } else {
+            showLoading(false);
+            showEmptyState(userList.isEmpty());
+        }
+
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -107,19 +126,20 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
             }
 
             @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-            }
+            public void onTabUnselected(TabLayout.Tab tab) {}
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
                 loadLeaderboardData(tab.getPosition());
             }
         });
+    }
 
-        if (savedInstanceState == null) {
-            loadLeaderboardData(tabLayout.getSelectedTabPosition());
-            loadCurrentUserRank();
-        }
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable(KEY_USER_LIST, new ArrayList<>(userList));
+        outState.putInt(KEY_SELECTED_TAB, tabLayout.getSelectedTabPosition());
     }
 
     private void setupNavigation() {
@@ -498,9 +518,9 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
         }
 
         if (intent != null) {
-            intent.putExtra("nombre", nombre); // Common extras
+            intent.putExtra("nombre", nombre);
             intent.putExtra("email", email);
-            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT); // Efficiently brings existing activity to front
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);
         }
 

@@ -82,6 +82,14 @@
     <string name="requierePermisosGal">Esta función requiere permisos de galería.</string>
     <string name="requierePermisosCam">Esta función requiere permisos de cámara.</string>
     <string name="cambiosTardan">Los cambios tardarán un poco en aplicarse.</string>
-    <string name="sinResultados">Sin resultados</string>
-    <string name="añadir">Añadir</string>
+
+
+
+    <string name="boton_trans">Opciones de transporte</string>
+    <string name="opciones_patita">Opción andando</string>
+    <string name="patita">Andando</string>
+    <string name="opciones_bus">Opción bus</string>
+    <string name="bus">Bus</string>
+    <string name="opciones_bici">Opción bicicleta</string>
+    <string name="bicicleta">Bicicleta</string>
 </resources>
