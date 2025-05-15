@@ -305,8 +305,12 @@ public class BDConnector extends Worker {
                         JSONObject jsonParam = new JSONObject();
                         jsonParam.put("accion", accion);
 
-                        if(getInputData().getString("usuario")!=null){
+                        if(getInputData().getString("usuario")!=null && getInputData().getString("usuario")!=null){
                             jsonParam.put("usuario", getInputData().getString("usuario"));
+                            if(!getInputData().getString("nombre").isEmpty()){jsonParam.put("newNom", getInputData().getString("nombre"));}
+                            if(!getInputData().getString("email").isEmpty()){jsonParam.put("newMail", getInputData().getString("email"));}
+                            jsonParam.put("pw", getInputData().getString("pw"));
+                            if(!getInputData().getString("nuevaPw").isEmpty()){jsonParam.put("newPw", getInputData().getString("nuevaPw"));}
                             paramsValidos = true;
                         }
 
@@ -337,20 +341,12 @@ public class BDConnector extends Worker {
                                 String mensaje = respuestaJson.optString("message", "Sin mensaje");
                                 String codigo = respuestaJson.optString("code", "-1");
                                 String nombre = respuestaJson.optString("nombre", "error");
-                                int monedas = respuestaJson.optInt("monedas", 0);
-                                int victs = respuestaJson.optInt("victs", 0);
-                                int derrs = respuestaJson.optInt("derrs", 0);
-                                int empts = respuestaJson.optInt("empts", 0);
 
                                 Log.d("RESPUESTA", response.toString()); // Imprimir respuesta del servidor
                                 return Result.success(new Data.Builder()
                                         .putString("message", mensaje)
                                         .putString("code", codigo)
                                         .putString("nombre", nombre)
-                                        .putInt("monedas", monedas)
-                                        .putInt("victs", victs)
-                                        .putInt("derrs", derrs)
-                                        .putInt("empts", empts)
                                         .build());
                             } else {
                                 Log.e("ERROR", "Error en la solicitud: " + responseCode);

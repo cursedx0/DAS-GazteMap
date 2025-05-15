@@ -43,6 +43,7 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
     private String nombre;
     private String email;
     private String lastPfp;
+    private TextView txtNombre, txtEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,15 +79,15 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
         View headerView = navigationView.getMenu().findItem(R.id.n_perfil).getActionView();
         if (headerView != null) {
             imgPerfil = headerView.findViewById(R.id.imgPerfil);
-            obtenerPfpNav();
-            TextView txtNombre = headerView.findViewById(R.id.campoNombreNav);
-            TextView txtEmail = headerView.findViewById(R.id.campoEmail);
-
-            // poner aqui datos sacados al hacer login
+            txtNombre = headerView.findViewById(R.id.campoNombreNav);
+            txtEmail = headerView.findViewById(R.id.campoEmail);
             nombre = getIntent().getStringExtra("nombre");
             email = getIntent().getStringExtra("email");
-            txtNombre.setText(nombre);
-            txtEmail.setText(email);
+            obtenerPfpNav();
+
+            // poner aqui datos sacados al hacer login
+
+
             // imagen: imgPerfil.setImageResource(fotolukenserver);
         }
 
@@ -197,6 +198,8 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
         if (id == R.id.Viajar) {
             Intent intent = new Intent(AllActivity.this, MapActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            actExtras();
+
             startActivity(intent);
         } else if (id == R.id.Amigos) {
             if (!Objects.equals(frag, "amigos")) { //solo cambia fragment si no está en amigos
@@ -217,11 +220,17 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
             }
         } else if (id == R.id.Top500) {
             Intent intent = new Intent(AllActivity.this, LeaderboardActivity.class);
+            actExtras();
             intent.putExtra("nombre", nombre);
             intent.putExtra("email", email);
             startActivity(intent);
         } else if (id == R.id.Foro){
             Intent intent = new Intent(AllActivity.this, ForumActivity.class);
+            NavigationView navigationView = findViewById(R.id.nav_view);
+            navigationView.setCheckedItem(R.id.Foro);
+            actExtras();
+            intent.putExtra("nombre",nombre);
+            intent.putExtra("email",email);
             startActivity(intent);
         }
         else if (id == R.id.Opciones) {
@@ -247,16 +256,24 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
         return true;
     }
 
+    public void actExtras(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(AllActivity.this);
+        nombre = prefs.getString("nombre","error");
+        email = prefs.getString("email","errormail");
+    }
+
     @Override
     public void onResume(){
         super.onResume();
         actualizarNavCheck();
-        if(lastPfp!=null) {
+        if(lastPfp!=null && nombre!=null) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(AllActivity.this);
             String lp = prefs.getString("lastPfp", "error");
             if (!lastPfp.equals(lp)) {
                 obtenerPfpNav();
             }
+            nombre = prefs.getString("nombre","error");
+            email = prefs.getString("email","errormail");
         }
     }
 
@@ -269,6 +286,11 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
     }
 
     public void obtenerPfpNav(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(AllActivity.this);
+        nombre = prefs.getString("nombre","error");
+        email = prefs.getString("email","errormail");
+        txtNombre.setText(nombre);
+        txtEmail.setText(email);
         if(nombre!=null) {
             Data datos = new Data.Builder()
                     .putString("url","2") //url a php gestor de monedas

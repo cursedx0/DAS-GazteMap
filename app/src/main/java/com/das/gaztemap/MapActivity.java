@@ -78,6 +78,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private String email;
     private ShapeableImageView imgPerfil;
     private String lastPfp;
+    private TextView txtNombre, txtEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,15 +93,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         View headerView = navigationView.getMenu().findItem(R.id.n_perfil).getActionView();
         if (headerView != null) {
             imgPerfil = headerView.findViewById(R.id.imgPerfil);
-            TextView txtNombre = headerView.findViewById(R.id.campoNombreNav);
-            TextView txtEmail = headerView.findViewById(R.id.campoEmail);
+            txtNombre = headerView.findViewById(R.id.campoNombreNav);
+            txtEmail = headerView.findViewById(R.id.campoEmail);
 
             // poner aqui datos sacados al hacer login
             nombre = getIntent().getStringExtra("nombre");
             email = getIntent().getStringExtra("email");
             obtenerPfpNav();
-            txtNombre.setText(nombre);
-            txtEmail.setText(email);
             // imagen: imgPerfil.setImageResource(fotolukenserver);
         }
         Button botonEdit = headerView.findViewById(R.id.btnEditUser);
@@ -358,46 +357,70 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             Intent intent = new Intent(MapActivity.this, AllActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             intent.putExtra("frag","amigos");
+            actExtras();
             intent.putExtra("nombre",nombre);
             intent.putExtra("email",email);
             NavigationView navigationView = findViewById(R.id.nav_view);
             navigationView.setCheckedItem(R.id.Amigos);
             startActivity(intent);
         } else if (id == R.id.Top500) {
-                Intent intent = new Intent(MapActivity.this, LeaderboardActivity.class);
-                intent.putExtra("nombre", nombre);
-                intent.putExtra("email", email);
-                startActivity(intent);
+            Intent intent = new Intent(MapActivity.this, LeaderboardActivity.class);
+            actExtras();
+            intent.putExtra("nombre", nombre);
+            intent.putExtra("email", email);
+            startActivity(intent);
         } else if (id == R.id.Foro){
             Intent intent = new Intent(MapActivity.this, ForumActivity.class);
             NavigationView navigationView = findViewById(R.id.nav_view);
             navigationView.setCheckedItem(R.id.Foro);
+            actExtras();
             intent.putExtra("nombre",nombre);
             intent.putExtra("email",email);
             startActivity(intent);
         }
         else if (id == R.id.Opciones) {
-
+            Intent intent = new Intent(MapActivity.this, AllActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.putExtra("frag","opciones");
+            actExtras();
+            intent.putExtra("nombre",nombre);
+            intent.putExtra("email",email);
+            NavigationView navigationView = findViewById(R.id.nav_view);
+            navigationView.setCheckedItem(R.id.Amigos);
+            startActivity(intent);
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 
+    public void actExtras(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MapActivity.this);
+        nombre = prefs.getString("nombre","error");
+        email = prefs.getString("email","errormail");
+    }
+
     @Override
     public void onResume(){
         super.onResume();
         navigationView.setCheckedItem(R.id.Viajar);
-        if(lastPfp!=null) {
+        if(lastPfp!=null && nombre!=null) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MapActivity.this);
             String lp = prefs.getString("lastPfp", "error");
             if (!lastPfp.equals(lp)) {
                 obtenerPfpNav();
             }
+            nombre = prefs.getString("nombre","error");
+            email = prefs.getString("email","errormail");
         }
     }
 
     public void obtenerPfpNav(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MapActivity.this);
+        nombre = prefs.getString("nombre","error");
+        email = prefs.getString("email","errormail");
+        txtNombre.setText(nombre);
+        txtEmail.setText(email);
         if(nombre!=null) {
             Data datos = new Data.Builder()
                     .putString("url","2") //url a php gestor de monedas

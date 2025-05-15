@@ -213,7 +213,7 @@ public class EditarUsuarioDF extends DialogFragment {
             return;
         }
 
-        if (!Patterns.EMAIL_ADDRESS.matcher(nuevoEmail).matches()) {
+        if (!Patterns.EMAIL_ADDRESS.matcher(nuevoEmail).matches() && !nuevoEmail.isEmpty()) {
             Toast.makeText(getContext(), getString(R.string.errorEmail), Toast.LENGTH_SHORT).show();
             return;
         }
@@ -236,8 +236,21 @@ public class EditarUsuarioDF extends DialogFragment {
                 .observe(this, workInfo -> {
                     if (workInfo != null && workInfo.getState().isFinished()) {
                         String mensaje = workInfo.getOutputData().getString("message");
+                        String codigo = workInfo.getOutputData().getString("code");
                         Toast.makeText(getContext(), mensaje, Toast.LENGTH_SHORT).show();
+                        if(codigo.equals("0")){
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+                            SharedPreferences.Editor editor = prefs.edit();
+                            if(!nuevoNombre.isEmpty()){
+                                nombre = nuevoNombre;
+                                editor.putString("nombre", nombre);
+                            }
+                            if(!nuevoEmail.isEmpty()){
+                                editor.putString("email", nuevoEmail);
+                            }
 
+                            editor.apply();
+                        }
                         if (listener != null) {
                             listener.onUsuarioEditado();
                         }
