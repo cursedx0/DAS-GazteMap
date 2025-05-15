@@ -24,6 +24,10 @@ public class Graph {
         adjacencyList.computeIfAbsent(destination, k -> new ArrayList<>()).add(new Edge(source, weight)); // Grafo no dirigido
     }
 
+    public Set<LatLng> getNodes() {
+        return adjacencyList.keySet();
+    }
+
     // Método para calcular la ruta más corta usando Dijkstra
     public List<LatLng> getShortestPath(LatLng start, LatLng end) {
         Map<LatLng, Double> distances = new HashMap<>();

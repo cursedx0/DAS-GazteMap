@@ -58,8 +58,10 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import widget.MapAppWidget;
 
@@ -135,6 +137,21 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         }
     }
 
+    // Encuentra el nodo más cercano al usuario
+    private LatLng findNearestNode(LatLng userLocation, Graph graph) {
+        LatLng nearestNode = null;
+        double minDistance = Double.MAX_VALUE;
+
+        for (LatLng node : graph.getNodes()) {
+            double distance = calculateDistance(userLocation, node);
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestNode = node;
+            }
+        }
+        return nearestNode;
+    }
+
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
@@ -144,29 +161,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 == PackageManager.PERMISSION_GRANTED) {
             enableUserLocation();
         } else {
-            // Solicitar permisos si no se han solicitado antes
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                new AlertDialog.Builder(this)
-                        .setTitle("Ubicación desactivada")
-                        .setMessage("Por favor, activa la ubicación del móvil para usar esta funcionalidad.")
-                        .setPositiveButton("Aceptar", (dialog, which) -> {
-                            Intent intent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                            startActivity(intent);
-                        })
-                        .setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss())
-                        .show();
-            } else {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        LOCATION_PERMISSION_REQUEST_CODE);
-            }
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    LOCATION_PERMISSION_REQUEST_CODE);
         }
 
-        // Centrar el mapa en Vitoria-Gasteiz
         LatLng vitoria = new LatLng(42.8460, -2.6716);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(vitoria, 15));
 
-        // Cargar y procesar el GeoJsonLayer
         new Thread(() -> {
             try {
                 URL url = new URL("http://ec2-51-44-167-78.eu-west-3.compute.amazonaws.com/lbilbao040/WEB/GazteMap/viasciclistas23Maps.geojson");
@@ -182,7 +184,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 JSONObject geoJsonData = new JSONObject(geoJsonString);
                 GeoJsonLayer layer = new GeoJsonLayer(mMap, geoJsonData);
 
-                // Construir el grafo desde el GeoJsonLayer
                 Graph graph = new Graph();
                 for (GeoJsonFeature feature : layer.getFeatures()) {
                     if (feature.getGeometry() != null && feature.getGeometry().getGeometryType().equals("LineString")) {
@@ -196,44 +197,58 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     }
                 }
 
-                // Obtener la ubicación del usuario
                 FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
                 fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
                     if (location != null) {
                         LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                        LatLng upvLocation = new LatLng(42.8492, -2.6725); // Coordenadas de la UPV
+                        LatLng upvLocation = new LatLng(42.8394805013312, -2.670361262280153);
 
-                        // Calcular la ruta más corta
-                        List<LatLng> shortestPath = graph.getShortestPath(userLocation, upvLocation);
+                        // Encuentra el nodo más cercano al usuario
+                        LatLng nearestNode = findNearestNode(userLocation, graph);
+                        Log.d("NearestNodeDebug", "Nearest node to user: " + nearestNode);
 
-                        // Dibujar el layer
+                        // Encuentra el nodo más cercano a la UPV
+                        LatLng nearestToDestination = findNearestNode(upvLocation, graph);
+                        Log.d("NearestNodeDebug", "Nearest node to destination: " + nearestToDestination);
+
+                        // Calcula la ruta más corta desde el nodo más cercano
+                        List<LatLng> shortestPath = graph.getShortestPath(nearestNode, nearestToDestination);
+                        Log.d("ShortestPathDebug", "Shortest path: " + shortestPath);
+
                         runOnUiThread(() -> {
+                            PolylineOptions shortestPathPolyline = new PolylineOptions()
+                                    .width(10)
+                                    .color(Color.GREEN);
+
                             for (GeoJsonFeature feature : layer.getFeatures()) {
                                 if (feature.getGeometry() != null && feature.getGeometry().getGeometryType().equals("LineString")) {
                                     List<LatLng> points = ((GeoJsonLineString) feature.getGeometry()).getCoordinates();
-                                    PolylineOptions polylineOptions = new PolylineOptions()
-                                            .addAll(points)
-                                            .width(10);
 
-                                    // Verificar si la línea forma parte del camino más corto
-                                    boolean isPartOfShortestPath = false;
                                     for (int i = 0; i < points.size() - 1; i++) {
                                         LatLng start = points.get(i);
                                         LatLng end = points.get(i + 1);
-                                        if (shortestPath.contains(start) && shortestPath.contains(end)) {
-                                            isPartOfShortestPath = true;
-                                            break;
+
+                                        // Verificar si el segmento (start -> end) está en el shortestPath
+                                        boolean isPartOfShortestPath = false;
+                                        for (int j = 0; j < shortestPath.size() - 1; j++) {
+                                            LatLng pathStart = shortestPath.get(j);
+                                            LatLng pathEnd = shortestPath.get(j + 1);
+
+                                            if ((start.equals(pathStart) && end.equals(pathEnd)) ||
+                                                    (start.equals(pathEnd) && end.equals(pathStart))) {
+                                                isPartOfShortestPath = true;
+                                                break;
+                                            }
                                         }
-                                    }
 
-                                    // Establecer el color según corresponda
-                                    if (isPartOfShortestPath) {
-                                        polylineOptions.color(Color.GREEN);
-                                    } else {
-                                        polylineOptions.color(Color.RED);
-                                    }
+                                        // Dibujar solo el segmento necesario
+                                        PolylineOptions segmentPolyline = new PolylineOptions()
+                                                .add(start, end)
+                                                .width(10)
+                                                .color(isPartOfShortestPath ? Color.GREEN : Color.RED);
 
-                                    mMap.addPolyline(polylineOptions);
+                                        mMap.addPolyline(segmentPolyline);
+                                    }
                                 }
                             }
                         });
