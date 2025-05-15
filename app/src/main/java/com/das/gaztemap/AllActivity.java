@@ -1,11 +1,14 @@
 package com.das.gaztemap;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +42,7 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
     private ShapeableImageView imgPerfil;
     private String nombre;
     private String email;
+    private String lastPfp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +89,24 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
             txtEmail.setText(email);
             // imagen: imgPerfil.setImageResource(fotolukenserver);
         }
+
+        //botones drawer
+        Button botonEdit = headerView.findViewById(R.id.btnEditUser);
+        botonEdit.setOnClickListener(v -> {
+            EditarUsuarioDF edf = EditarUsuarioDF.newIntance(nombre);
+            edf.show(getSupportFragmentManager(), "edit_dialog");
+        });
+
+        Button botonCerrar = headerView.findViewById(R.id.btnLogout);
+        botonCerrar.setOnClickListener(a -> {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(AllActivity.this);
+            SharedPreferences.Editor editor = prefs.edit();
+            Intent logout = new Intent(AllActivity.this, MainActivity.class);
+            editor.putBoolean("rember", false);
+            editor.apply();
+            startActivity(logout);
+
+        });
 
         if (Objects.equals(frag, "amigos")) {
             AmigosFragment af = new AmigosFragment();
@@ -194,6 +216,10 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
                 }
             }
         } else if (id == R.id.Top500) {
+            Intent intent = new Intent(AllActivity.this, LeaderboardActivity.class);
+            intent.putExtra("nombre", nombre);
+            intent.putExtra("email", email);
+            startActivity(intent);
         } else if (id == R.id.Foro){
             Intent intent = new Intent(AllActivity.this, ForumActivity.class);
             startActivity(intent);
@@ -225,6 +251,13 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
     public void onResume(){
         super.onResume();
         actualizarNavCheck();
+        if(lastPfp!=null) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(AllActivity.this);
+            String lp = prefs.getString("lastPfp", "error");
+            if (!lastPfp.equals(lp)) {
+                obtenerPfpNav();
+            }
+        }
     }
 
     public void actualizarNavCheck(){
@@ -274,6 +307,7 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
                                                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                                                 .skipMemoryCache(true)
                                                 .into(imgPerfil); // Tu ImageView
+                                        lastPfp = urlConId;
                                     }else{
                                         imgPerfil.setImageResource(R.drawable.placeholder);
                                     }

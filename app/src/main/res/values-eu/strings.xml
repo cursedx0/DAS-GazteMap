@@ -43,4 +43,5 @@
     <string name="necesitaContraseña">Zure oraingo pasahitza sartu, mesedez</string>
     <string name="requierePermisosGal">Funtzio honek galeriara sartzeko baimenak behar ditu.</string>
     <string name="requierePermisosCam">Funtzio honek argazkiak ateratzeko baimenak behar ditu.</string>
+    <string name="cambiosTardan">Aldaketak laster ikusiko dira.</string>
 </resources>
