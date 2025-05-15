@@ -58,8 +58,10 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import widget.MapAppWidget;
 
@@ -215,31 +217,39 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         Log.d("ShortestPathDebug", "Shortest path: " + shortestPath);
 
                         runOnUiThread(() -> {
+                            PolylineOptions shortestPathPolyline = new PolylineOptions()
+                                    .width(10)
+                                    .color(Color.GREEN);
+
                             for (GeoJsonFeature feature : layer.getFeatures()) {
                                 if (feature.getGeometry() != null && feature.getGeometry().getGeometryType().equals("LineString")) {
                                     List<LatLng> points = ((GeoJsonLineString) feature.getGeometry()).getCoordinates();
-                                    PolylineOptions polylineOptions = new PolylineOptions()
-                                            .addAll(points)
-                                            .width(10);
 
-                                    boolean isPartOfShortestPath = false;
                                     for (int i = 0; i < points.size() - 1; i++) {
                                         LatLng start = points.get(i);
                                         LatLng end = points.get(i + 1);
-                                        if (shortestPath.contains(start) && shortestPath.contains(end)) {
-                                            Log.d("PathDebug", "Line is part of shortest path: " + start + " -> " + end);
-                                            isPartOfShortestPath = true;
-                                            break;
+
+                                        // Verificar si el segmento (start -> end) está en el shortestPath
+                                        boolean isPartOfShortestPath = false;
+                                        for (int j = 0; j < shortestPath.size() - 1; j++) {
+                                            LatLng pathStart = shortestPath.get(j);
+                                            LatLng pathEnd = shortestPath.get(j + 1);
+
+                                            if ((start.equals(pathStart) && end.equals(pathEnd)) ||
+                                                    (start.equals(pathEnd) && end.equals(pathStart))) {
+                                                isPartOfShortestPath = true;
+                                                break;
+                                            }
                                         }
-                                    }
 
-                                    if (isPartOfShortestPath) {
-                                        polylineOptions.color(Color.GREEN);
-                                    } else {
-                                        polylineOptions.color(Color.RED);
-                                    }
+                                        // Dibujar solo el segmento necesario
+                                        PolylineOptions segmentPolyline = new PolylineOptions()
+                                                .add(start, end)
+                                                .width(10)
+                                                .color(isPartOfShortestPath ? Color.GREEN : Color.RED);
 
-                                    mMap.addPolyline(polylineOptions);
+                                        mMap.addPolyline(segmentPolyline);
+                                    }
                                 }
                             }
                         });
