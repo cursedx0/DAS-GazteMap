@@ -68,22 +68,22 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
     private ProgressBar loadingView;
     private RequestQueue requestQueue;
 
+    // State variables for user rank information
+    private int userRank = -1;
+    private int userPoints = 0;
+    private String userImageUrl = "";
+
     private static final String KEY_USER_LIST = "user_list";
     private static final String KEY_SELECTED_TAB = "selected_tab";
-
+    private static final String KEY_USER_RANK = "user_rank";
+    private static final String KEY_USER_POINTS = "user_points";
+    private static final String KEY_USER_IMAGE_URL = "user_image_url";
+    private static final String KEY_USER_RANK_LOADED = "user_rank_loaded";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_leaderboard);
-
-        if (savedInstanceState != null) {
-            userList = (ArrayList<LeaderboardUser>) savedInstanceState.getSerializable(KEY_USER_LIST);
-            int selectedTab = savedInstanceState.getInt(KEY_SELECTED_TAB, 0);
-            if (tabLayout != null && selectedTab < tabLayout.getTabCount()) {
-                tabLayout.getTabAt(selectedTab).select();
-            }
-        }
 
         requestQueue = Volley.newRequestQueue(this);
         nombre = getIntent().getStringExtra("nombre");
@@ -100,23 +100,47 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
 
         recyclerView = findViewById(R.id.recycler_leaderboard);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        userList = new ArrayList<>();
         adapter = new LeaderboardAdapter(this, userList);
         recyclerView.setAdapter(adapter);
 
         tabLayout = findViewById(R.id.tab_layout);
-        if (tabLayout.getTabCount() == 0) {
-            tabLayout.addTab(tabLayout.newTab().setText(R.string.historico));
-            tabLayout.addTab(tabLayout.newTab().setText(R.string.mensual));
-            tabLayout.addTab(tabLayout.newTab().setText(R.string.semanal));
-            tabLayout.addTab(tabLayout.newTab().setText(R.string.diario));
-        }
+        tabLayout.removeAllTabs(); // Clear existing tabs
+        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.lGlobal)));
+        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.lamigos)));
 
-        if (userList.isEmpty() && savedInstanceState == null) {
-            loadLeaderboardData(tabLayout.getSelectedTabPosition());
-            loadCurrentUserRank();
-        } else {
+        if (savedInstanceState != null) {
+            ArrayList<LeaderboardUser> savedList = (ArrayList<LeaderboardUser>) savedInstanceState.getSerializable(KEY_USER_LIST);
+            if (savedList != null && !savedList.isEmpty()) {
+                userList.clear();
+                userList.addAll(savedList);
+                adapter.notifyDataSetChanged();
+            }
+
+            int selectedTab = savedInstanceState.getInt(KEY_SELECTED_TAB, 0);
+            if (tabLayout != null && selectedTab < tabLayout.getTabCount()) {
+                tabLayout.getTabAt(selectedTab).select();
+            }
+
+            userRank = savedInstanceState.getInt(KEY_USER_RANK, -1);
+            userPoints = savedInstanceState.getInt(KEY_USER_POINTS, 0);
+            userImageUrl = savedInstanceState.getString(KEY_USER_IMAGE_URL, "");
+            boolean userRankLoaded = savedInstanceState.getBoolean(KEY_USER_RANK_LOADED, false);
+
+            if (userRankLoaded) {
+                updateUserRankUI();
+            }
+
             showLoading(false);
             showEmptyState(userList.isEmpty());
+
+            if (userRank == -1) {
+                loadCurrentUserRank();
+            }
+        } else {
+            loadLeaderboardData(tabLayout.getSelectedTabPosition());
+            loadCurrentUserRank();
         }
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -138,8 +162,38 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(KEY_USER_LIST, new ArrayList<>(userList));
+
+        ArrayList<LeaderboardUser> listToSave = new ArrayList<>(userList);
+        outState.putSerializable(KEY_USER_LIST, listToSave);
         outState.putInt(KEY_SELECTED_TAB, tabLayout.getSelectedTabPosition());
+        outState.putInt(KEY_USER_RANK, userRank);
+        outState.putInt(KEY_USER_POINTS, userPoints);
+        outState.putString(KEY_USER_IMAGE_URL, userImageUrl);
+        outState.putBoolean(KEY_USER_RANK_LOADED, userRank != -1);
+
+        Log.d(TAG, "onSaveInstanceState: Saving state with " + listToSave.size() + " leaderboard items");
+    }
+
+    private void updateUserRankUI() {
+        if (userRank > 0) {
+            tvUserRank.setText(String.format(getString(R.string.rank), userRank));
+            tvUserPoints.setText(String.format(getString(R.string.points_cantidad), userPoints));
+
+            if (!userImageUrl.isEmpty() && !userImageUrl.equals("null")) {
+                Glide.with(LeaderboardActivity.this)
+                        .load(userImageUrl)
+                        .placeholder(R.drawable.placeholder)
+                        .error(R.drawable.placeholder)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true)
+                        .into(userProfileImageCard);
+            } else {
+                userProfileImageCard.setImageResource(R.drawable.placeholder);
+            }
+            userRankCard.setVisibility(View.VISIBLE);
+        } else {
+            userRankCard.setVisibility(View.GONE);
+        }
     }
 
     private void setupNavigation() {
@@ -158,9 +212,8 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
             headerView = navigationView.getHeaderView(0);
         }
 
-
         if (headerView != null) {
-            imgPerfilNavHeader = headerView.findViewById(R.id.imgPerfil); // Ensure this ID exists in your header layout
+            imgPerfilNavHeader = headerView.findViewById(R.id.imgPerfil);
             TextView txtNombre = headerView.findViewById(R.id.campoNombreNav);
             TextView txtEmail = headerView.findViewById(R.id.campoEmail);
 
@@ -207,20 +260,15 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
         });
     }
 
-
-    private void loadLeaderboardData(int periodType) {
-        String period;
-        switch (periodType) {
-            case 1: period = "monthly"; break;
-            case 2: period = "weekly"; break;
-            case 3: period = "daily"; break;
-            default: period = "alltime"; break;
-        }
-
+    private void loadLeaderboardData(int tabPosition) {
+        String type = (tabPosition == 0) ? "global" : "friends";
         showLoading(true);
         userList.clear();
         adapter.notifyDataSetChanged();
         showEmptyState(false);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(LeaderboardActivity.this);
+        int userId = prefs.getInt("id", 0);
 
         StringRequest request = new StringRequest(Request.Method.POST, API_URL,
                 response -> {
@@ -229,7 +277,7 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
                 },
                 error -> {
                     showLoading(false);
-                    Log.e(TAG, "Error in Volley request for leaderboard ("+period+"): " + error.toString());
+                    Log.e(TAG, "Error in Volley request for leaderboard (" + type + "): " + error.toString());
                     showEmptyState(true);
 
                     String errorMessage = "Error loading leaderboard";
@@ -254,14 +302,26 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
                     Toast.makeText(LeaderboardActivity.this, errorMessage, Toast.LENGTH_LONG).show();
                 }) {
             @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
+            protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
                 params.put("action", "getLeaderboard");
-                params.put("period", period);
-                params.put("limit", "100");
+                params.put("type", type);
+
+                if (type.equals("friends")) {
+                    if (userId == 0) {
+                        runOnUiThread(() -> Toast.makeText(
+                                LeaderboardActivity.this,
+                                "User ID not found. Please login again.",
+                                Toast.LENGTH_LONG
+                        ).show());
+                    } else {
+                        params.put("userId", String.valueOf(userId));
+                    }
+                }
                 return params;
             }
         };
+
         requestQueue.add(request);
     }
 
@@ -278,25 +338,10 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
                         String status = jsonResponse.getString("status");
 
                         if (status.equals("success")) {
-                            int rank = jsonResponse.getInt("rank");
-                            int points = jsonResponse.getInt("points");
-                            String imageUrl = jsonResponse.optString("profile_image", "");
-
-                            tvUserRank.setText(String.format(getString(R.string.rank), rank));
-                            tvUserPoints.setText(String.format(getString(R.string.points_cantidad), points));
-
-                            if (!imageUrl.isEmpty() && !imageUrl.equals("null")) {
-                                Glide.with(LeaderboardActivity.this)
-                                        .load(imageUrl)
-                                        .placeholder(R.drawable.placeholder)
-                                        .error(R.drawable.placeholder)
-                                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                        .skipMemoryCache(true)
-                                        .into(userProfileImageCard);
-                            } else {
-                                userProfileImageCard.setImageResource(R.drawable.placeholder);
-                            }
-                            userRankCard.setVisibility(View.VISIBLE);
+                            userRank = jsonResponse.getInt("rank");
+                            userPoints = jsonResponse.getInt("points");
+                            userImageUrl = jsonResponse.optString("profile_image", "");
+                            updateUserRankUI();
                         } else {
                             Log.e(TAG, "Error getting user rank (API): " + jsonResponse.optString("message", "Unknown API error"));
                             userRankCard.setVisibility(View.GONE);
@@ -318,9 +363,6 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
                 Map<String, String> params = new HashMap<>();
                 params.put("action", "getUserRank");
                 params.put("nombre", nombre);
-                // periodo aqui
-                // String currentPeriod = "alltime";
-                // params.put("period", currentPeriod);
                 return params;
             }
         };
@@ -333,14 +375,11 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
             String status = jsonResponse.getString("status");
 
             if (status.equals("success")) {
+                userList.clear();
                 JSONArray usersArray = jsonResponse.getJSONArray("users");
-                int userPositionInTopList = -1;
-
                 for (int i = 0; i < usersArray.length(); i++) {
                     JSONObject userObject = usersArray.getJSONObject(i);
                     boolean isCurrentUser = userObject.getString("nombre").equals(nombre);
-                    if (isCurrentUser) userPositionInTopList = i;
-
                     LeaderboardUser user = new LeaderboardUser(
                             i + 1,
                             userObject.getString("nombre"),
@@ -351,12 +390,9 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
                     user.setCurrentUser(isCurrentUser);
                     userList.add(user);
                 }
-
                 adapter.notifyDataSetChanged();
                 showEmptyState(userList.isEmpty());
-
-
-
+                Log.d(TAG, "parseLeaderboardData: Loaded " + userList.size() + " users");
             } else {
                 showEmptyState(true);
                 Log.e(TAG, "Leaderboard data status not success: " + jsonResponse.optString("message"));
@@ -368,64 +404,6 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
             Toast.makeText(this, "Error parsing leaderboard data.", Toast.LENGTH_SHORT).show();
         }
     }
-
-
-    private void fetchCurrentUserPosition() {
-        if (nombre == null || nombre.isEmpty()) return;
-
-
-        String currentPeriod = "alltime";
-        int selectedTabPos = tabLayout.getSelectedTabPosition();
-        if (selectedTabPos == 1) currentPeriod = "monthly";
-        else if (selectedTabPos == 2) currentPeriod = "weekly";
-        else if (selectedTabPos == 3) currentPeriod = "daily";
-        final String periodForRequest = currentPeriod;
-
-
-        StringRequest request = new StringRequest(Request.Method.POST, API_URL,
-                response -> {
-                    try {
-                        JSONObject json = new JSONObject(response);
-                        if (json.getString("status").equals("success")) {
-                            boolean userExistsInList = false;
-                            for (LeaderboardUser u : userList) {
-                                if (u.getName().equals(nombre)) {
-                                    userExistsInList = true;
-                                    break;
-                                }
-                            }
-
-                            if (!userExistsInList) {
-                                LeaderboardUser currentUser = new LeaderboardUser(
-                                        json.getInt("rank"),
-                                        nombre,
-                                        json.getInt("points"),
-                                        json.optString("profile_image", ""),
-                                        json.optInt("conectado",0) == 1
-                                );
-                                currentUser.setCurrentUser(true);
-                                userList.add(currentUser);
-                                adapter.notifyItemInserted(userList.size() - 1);
-                                showEmptyState(userList.isEmpty());
-                            }
-                        }
-                    } catch (JSONException e) {
-                        Log.e(TAG, "Error parsing user position JSON in fetchCurrentUserPosition", e);
-                    }
-                },
-                error -> Log.e(TAG, "Error fetching user position in fetchCurrentUserPosition: " + error.toString())) {
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-                params.put("action", "getUserRank");
-                params.put("nombre", nombre);
-                params.put("period", periodForRequest);
-                return params;
-            }
-        };
-        requestQueue.add(request);
-    }
-
 
     private void showLoading(boolean isLoading) {
         if (loadingView != null) {
@@ -442,7 +420,6 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
             emptyView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
         }
         if (recyclerView != null) {
-
             if (!isEmpty && (loadingView != null && loadingView.getVisibility() == View.GONE)) {
                 recyclerView.setVisibility(View.VISIBLE);
             } else {

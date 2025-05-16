@@ -67,7 +67,7 @@ public class CommentsActivity extends AppCompatActivity {
         fabSubscribe = findViewById(R.id.fabSubscribe);
 
         commentList = new ArrayList<>();
-        commentAdapter = new CommentAdapter(this, commentList);
+        commentAdapter = new CommentAdapter(this, commentList, currentUserId); // Pasa el currentUserId
         recyclerViewComments.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewComments.setAdapter(commentAdapter);
 

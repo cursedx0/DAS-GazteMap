@@ -102,4 +102,6 @@
     <string name="soliRechazada">Solicitud rechazada.</string>
     <string name="soliError">Error al procesar solicitud.</string>
     <string name="sinSoli">No tienes solicitudes todavía.</string>
+    <string name="lamigos">Leaderboard Amigos 🫂</string>
+    <string name="lGlobal">Leaderboard Global 🌎</string>
 </resources>

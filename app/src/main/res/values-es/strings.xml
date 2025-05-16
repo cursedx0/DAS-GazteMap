@@ -92,4 +92,6 @@
     <string name="opciones_bus">Opción bus</string>
     <string name="bus">Bus</string>
     <string name="opciones_bici">Opción bicicleta</string>
+    <string name="lamigos">Leaderboard Amigos 🫂</string>
+    <string name="lGlobal">Leaderboard Global 🌎</string>
 </resources>

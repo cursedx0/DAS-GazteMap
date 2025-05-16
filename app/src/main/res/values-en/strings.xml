@@ -60,7 +60,7 @@
     <string name="apartados">📌 Sections</string>
     <string name="apartado_mapa">🗺️ Map</string>
     <string name="apartado_TOP500">🏆 Top 500 users</string>
-    <string name="apartado_amigos">🤝 Firends</string>
+    <string name="apartado_amigos">🤝 Friends</string>
     <string name="apartado_foro">💬 Forum</string>
     <string name="apartado_configuracion">⚙️ Options</string>
     <string name="alerta_notificaciones">Notifications</string>
@@ -92,4 +92,6 @@
     <string name="opciones_bus">Bus option</string>
     <string name="bus">Bus</string>
     <string name="opciones_bici">Bicycle option</string>
+    <string name="lamigos">Friends leaderboard 🫂</string>
+    <string name="lGlobal">Global leaderboard 🌎</string>
 </resources>
