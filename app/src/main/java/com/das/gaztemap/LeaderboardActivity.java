@@ -46,7 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class LeaderboardActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class LeaderboardActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "LeaderboardActivity";
     private static final String API_URL = "http://ec2-51-44-167-78.eu-west-3.compute.amazonaws.com/lbilbao040/WEB/GazteMap/leaderboard.php";

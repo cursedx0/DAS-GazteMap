@@ -44,29 +44,29 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnEditUser"
+            style="@style/Widget.MaterialComponents.Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Editar perfil"
+            android:text="@string/editarPerfil"
             android:textAllCaps="false"
             app:cornerRadius="8dp"
             app:icon="@drawable/manage_accounts"
-            app:iconGravity="textStart"
-            style="@style/Widget.MaterialComponents.Button"/>
+            app:iconGravity="textStart" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLogout"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Cerrar sesión"
+            android:text="@string/cerrarSesion"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
+            app:backgroundTint="#E57373"
             app:cornerRadius="8dp"
             app:icon="@drawable/logout"
-            app:iconTint="@android:color/white"
             app:iconGravity="textStart"
-            app:backgroundTint="#E57373"
-            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"/>
+            app:iconTint="@android:color/white" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>
