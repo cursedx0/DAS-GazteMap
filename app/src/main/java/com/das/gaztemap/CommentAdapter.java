@@ -5,6 +5,7 @@ import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,10 +17,12 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 
     private Context context;
     private List<Comment> commentList;
+    private int currentUserId;
 
-    public CommentAdapter(Context context, List<Comment> commentList) {
+    public CommentAdapter(Context context, List<Comment> commentList, int currentUserId) {
         this.context = context;
         this.commentList = commentList;
+        this.currentUserId = currentUserId;
     }
 
     @NonNull
@@ -42,6 +45,12 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
                 DateUtils.MINUTE_IN_MILLIS
         );
         holder.textViewTimestamp.setText(timeAgo);
+
+        if (Integer.parseInt(comment.getUserId()) == currentUserId) {
+            holder.comentario.setBackgroundColor(context.getResources().getColor(R.color.azuladito));
+        } else {
+            holder.comentario.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
+        }
     }
 
     @Override
@@ -51,12 +60,14 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 
     static class CommentViewHolder extends RecyclerView.ViewHolder {
         TextView textViewUserName, textViewContent, textViewTimestamp;
+        LinearLayout comentario;
 
         public CommentViewHolder(@NonNull View itemView) {
             super(itemView);
             textViewUserName = itemView.findViewById(R.id.textViewUserName);
             textViewContent = itemView.findViewById(R.id.textViewContent);
             textViewTimestamp = itemView.findViewById(R.id.textViewTimestamp);
+            comentario = itemView.findViewById(R.id.comentario);
         }
     }
 }

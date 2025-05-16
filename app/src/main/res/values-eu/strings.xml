@@ -92,4 +92,6 @@
     <string name="opciones_bus">Bus aukera</string>
     <string name="bus">Bus</string>
     <string name="opciones_bici">Txirrindu aukera</string>
+    <string name="lamigos">Leaderboard lagunak 🫂</string>
+    <string name="lGlobal">Leaderboard mundua 🌎</string>
 </resources>
