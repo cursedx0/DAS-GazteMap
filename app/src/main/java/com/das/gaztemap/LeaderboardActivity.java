@@ -68,19 +68,17 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
     private ProgressBar loadingView;
     private RequestQueue requestQueue;
 
-    // Add state variables for user rank information
+    // State variables for user rank information
     private int userRank = -1;
     private int userPoints = 0;
     private String userImageUrl = "";
 
     private static final String KEY_USER_LIST = "user_list";
     private static final String KEY_SELECTED_TAB = "selected_tab";
-    // Add keys for saving user rank state
     private static final String KEY_USER_RANK = "user_rank";
     private static final String KEY_USER_POINTS = "user_points";
     private static final String KEY_USER_IMAGE_URL = "user_image_url";
     private static final String KEY_USER_RANK_LOADED = "user_rank_loaded";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,20 +101,15 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
         recyclerView = findViewById(R.id.recycler_leaderboard);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Initialize the adapter here regardless of state
         userList = new ArrayList<>();
         adapter = new LeaderboardAdapter(this, userList);
         recyclerView.setAdapter(adapter);
 
         tabLayout = findViewById(R.id.tab_layout);
-        if (tabLayout.getTabCount() == 0) {
-            tabLayout.addTab(tabLayout.newTab().setText(R.string.historico));
-            tabLayout.addTab(tabLayout.newTab().setText(R.string.mensual));
-            tabLayout.addTab(tabLayout.newTab().setText(R.string.semanal));
-            tabLayout.addTab(tabLayout.newTab().setText(R.string.diario));
-        }
+        tabLayout.removeAllTabs(); // Clear existing tabs
+        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.lGlobal)));
+        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.lamigos)));
 
-        // Handle restored state
         if (savedInstanceState != null) {
             ArrayList<LeaderboardUser> savedList = (ArrayList<LeaderboardUser>) savedInstanceState.getSerializable(KEY_USER_LIST);
             if (savedList != null && !savedList.isEmpty()) {
@@ -130,27 +123,22 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
                 tabLayout.getTabAt(selectedTab).select();
             }
 
-            // Restore user rank information
             userRank = savedInstanceState.getInt(KEY_USER_RANK, -1);
             userPoints = savedInstanceState.getInt(KEY_USER_POINTS, 0);
             userImageUrl = savedInstanceState.getString(KEY_USER_IMAGE_URL, "");
             boolean userRankLoaded = savedInstanceState.getBoolean(KEY_USER_RANK_LOADED, false);
 
-            // Si tenemos información guardada del rango de usuario, actualizamos la UI
             if (userRankLoaded) {
                 updateUserRankUI();
             }
 
-            // Update UI states based on the restored data
             showLoading(false);
             showEmptyState(userList.isEmpty());
 
-            // If needed, load user rank data
             if (userRank == -1) {
                 loadCurrentUserRank();
             }
         } else {
-            // Initial data loading
             loadLeaderboardData(tabLayout.getSelectedTabPosition());
             loadCurrentUserRank();
         }
@@ -175,15 +163,9 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        // Guardar los datos del leaderboard
-        // Utilizamos una nueva lista para evitar problemas de serialización
         ArrayList<LeaderboardUser> listToSave = new ArrayList<>(userList);
         outState.putSerializable(KEY_USER_LIST, listToSave);
-
-        // Guardar la pestaña seleccionada
         outState.putInt(KEY_SELECTED_TAB, tabLayout.getSelectedTabPosition());
-
-        // Guardar la información del rango de usuario
         outState.putInt(KEY_USER_RANK, userRank);
         outState.putInt(KEY_USER_POINTS, userPoints);
         outState.putString(KEY_USER_IMAGE_URL, userImageUrl);
@@ -192,7 +174,6 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
         Log.d(TAG, "onSaveInstanceState: Saving state with " + listToSave.size() + " leaderboard items");
     }
 
-    // Add method to update user rank UI
     private void updateUserRankUI() {
         if (userRank > 0) {
             tvUserRank.setText(String.format(getString(R.string.rank), userRank));
@@ -231,9 +212,8 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
             headerView = navigationView.getHeaderView(0);
         }
 
-
         if (headerView != null) {
-            imgPerfilNavHeader = headerView.findViewById(R.id.imgPerfil); // Ensure this ID exists in your header layout
+            imgPerfilNavHeader = headerView.findViewById(R.id.imgPerfil);
             TextView txtNombre = headerView.findViewById(R.id.campoNombreNav);
             TextView txtEmail = headerView.findViewById(R.id.campoEmail);
 
@@ -280,20 +260,15 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
         });
     }
 
-
-    private void loadLeaderboardData(int periodType) {
-        String period;
-        switch (periodType) {
-            case 1: period = "monthly"; break;
-            case 2: period = "weekly"; break;
-            case 3: period = "daily"; break;
-            default: period = "alltime"; break;
-        }
-
+    private void loadLeaderboardData(int tabPosition) {
+        String type = (tabPosition == 0) ? "global" : "friends";
         showLoading(true);
         userList.clear();
         adapter.notifyDataSetChanged();
         showEmptyState(false);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(LeaderboardActivity.this);
+        int userId = prefs.getInt("id", 0);
 
         StringRequest request = new StringRequest(Request.Method.POST, API_URL,
                 response -> {
@@ -302,7 +277,7 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
                 },
                 error -> {
                     showLoading(false);
-                    Log.e(TAG, "Error in Volley request for leaderboard ("+period+"): " + error.toString());
+                    Log.e(TAG, "Error in Volley request for leaderboard (" + type + "): " + error.toString());
                     showEmptyState(true);
 
                     String errorMessage = "Error loading leaderboard";
@@ -327,14 +302,26 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
                     Toast.makeText(LeaderboardActivity.this, errorMessage, Toast.LENGTH_LONG).show();
                 }) {
             @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
+            protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
                 params.put("action", "getLeaderboard");
-                params.put("period", period);
-                params.put("limit", "100");
+                params.put("type", type);
+
+                if (type.equals("friends")) {
+                    if (userId == 0) {
+                        runOnUiThread(() -> Toast.makeText(
+                                LeaderboardActivity.this,
+                                "User ID not found. Please login again.",
+                                Toast.LENGTH_LONG
+                        ).show());
+                    } else {
+                        params.put("userId", String.valueOf(userId));
+                    }
+                }
                 return params;
             }
         };
+
         requestQueue.add(request);
     }
 
@@ -351,12 +338,9 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
                         String status = jsonResponse.getString("status");
 
                         if (status.equals("success")) {
-                            // Store the data in member variables
                             userRank = jsonResponse.getInt("rank");
                             userPoints = jsonResponse.getInt("points");
                             userImageUrl = jsonResponse.optString("profile_image", "");
-
-                            // Update the UI with new data
                             updateUserRankUI();
                         } else {
                             Log.e(TAG, "Error getting user rank (API): " + jsonResponse.optString("message", "Unknown API error"));
@@ -379,9 +363,6 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
                 Map<String, String> params = new HashMap<>();
                 params.put("action", "getUserRank");
                 params.put("nombre", nombre);
-                // periodo aqui
-                // String currentPeriod = "alltime";
-                // params.put("period", currentPeriod);
                 return params;
             }
         };
@@ -394,17 +375,11 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
             String status = jsonResponse.getString("status");
 
             if (status.equals("success")) {
-                // Limpiar la lista anterior
                 userList.clear();
-
                 JSONArray usersArray = jsonResponse.getJSONArray("users");
-                int userPositionInTopList = -1;
-
                 for (int i = 0; i < usersArray.length(); i++) {
                     JSONObject userObject = usersArray.getJSONObject(i);
                     boolean isCurrentUser = userObject.getString("nombre").equals(nombre);
-                    if (isCurrentUser) userPositionInTopList = i;
-
                     LeaderboardUser user = new LeaderboardUser(
                             i + 1,
                             userObject.getString("nombre"),
@@ -415,13 +390,9 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
                     user.setCurrentUser(isCurrentUser);
                     userList.add(user);
                 }
-
-                // Notificar al adaptador que los datos han cambiado
                 adapter.notifyDataSetChanged();
                 showEmptyState(userList.isEmpty());
-
                 Log.d(TAG, "parseLeaderboardData: Loaded " + userList.size() + " users");
-
             } else {
                 showEmptyState(true);
                 Log.e(TAG, "Leaderboard data status not success: " + jsonResponse.optString("message"));
@@ -433,64 +404,6 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
             Toast.makeText(this, "Error parsing leaderboard data.", Toast.LENGTH_SHORT).show();
         }
     }
-
-
-    private void fetchCurrentUserPosition() {
-        if (nombre == null || nombre.isEmpty()) return;
-
-
-        String currentPeriod = "alltime";
-        int selectedTabPos = tabLayout.getSelectedTabPosition();
-        if (selectedTabPos == 1) currentPeriod = "monthly";
-        else if (selectedTabPos == 2) currentPeriod = "weekly";
-        else if (selectedTabPos == 3) currentPeriod = "daily";
-        final String periodForRequest = currentPeriod;
-
-
-        StringRequest request = new StringRequest(Request.Method.POST, API_URL,
-                response -> {
-                    try {
-                        JSONObject json = new JSONObject(response);
-                        if (json.getString("status").equals("success")) {
-                            boolean userExistsInList = false;
-                            for (LeaderboardUser u : userList) {
-                                if (u.getName().equals(nombre)) {
-                                    userExistsInList = true;
-                                    break;
-                                }
-                            }
-
-                            if (!userExistsInList) {
-                                LeaderboardUser currentUser = new LeaderboardUser(
-                                        json.getInt("rank"),
-                                        nombre,
-                                        json.getInt("points"),
-                                        json.optString("profile_image", ""),
-                                        json.optInt("conectado",0) == 1
-                                );
-                                currentUser.setCurrentUser(true);
-                                userList.add(currentUser);
-                                adapter.notifyItemInserted(userList.size() - 1);
-                                showEmptyState(userList.isEmpty());
-                            }
-                        }
-                    } catch (JSONException e) {
-                        Log.e(TAG, "Error parsing user position JSON in fetchCurrentUserPosition", e);
-                    }
-                },
-                error -> Log.e(TAG, "Error fetching user position in fetchCurrentUserPosition: " + error.toString())) {
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-                params.put("action", "getUserRank");
-                params.put("nombre", nombre);
-                params.put("period", periodForRequest);
-                return params;
-            }
-        };
-        requestQueue.add(request);
-    }
-
 
     private void showLoading(boolean isLoading) {
         if (loadingView != null) {
@@ -507,7 +420,6 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
             emptyView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
         }
         if (recyclerView != null) {
-
             if (!isEmpty && (loadingView != null && loadingView.getVisibility() == View.GONE)) {
                 recyclerView.setVisibility(View.VISIBLE);
             } else {
