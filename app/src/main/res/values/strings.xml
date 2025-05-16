@@ -50,7 +50,7 @@
     <string name="publicar">Publicar</string>
     <string name="descripcion_menu">Abrir menú de navegación</string>
     <string name="descripcion_nuevo_post">Crear nueva publicación</string>
-    <string name="nav_header_title">GazteMap</string>
+    <string name="nav_header_title" translatable="false">GazteMap</string>
     <string name="nav_header_subtitle">Comunidad vasca</string>
     <string name="menu_inicio">Inicio</string>
     <string name="menu_perfil">Perfil</string>
@@ -68,7 +68,7 @@
 
 
 
-    <string name="top_500">Top 500</string>
+    <string name="top_500" translatable="false">Top 500</string>
     <string name="leaderboard">Compite con otros usuarios y gana puntos</string>
     <string name="points_cantidad">%d puntos</string>
     <string name="points_placeholder">0 puntos</string>
