@@ -9,10 +9,12 @@ public class Post {
     private int likeCount;
     private int commentCount;
     private boolean isLiked;
+    private String profileImageUrl;
+
 
     public Post() {}
 
-    public Post(String postId, String userId, String userName, String content, long timestamp) {
+    public Post(String postId, String userId, String userName, String content, long timestamp,  String profileImageUrl) {
         this.postId = postId;
         this.userId = userId;
         this.userName = userName;
@@ -20,6 +22,8 @@ public class Post {
         this.timestamp = timestamp;
         this.likeCount = 0;
         this.commentCount = 0;
+        this.profileImageUrl = profileImageUrl;
+
     }
 
     public String getPostId() { return postId; }
@@ -43,4 +47,8 @@ public class Post {
     public void setLiked(boolean liked) { isLiked = liked; }
     public int getCommentCount() { return commentCount; }
     public void setCommentCount(int commentCount) { this.commentCount = commentCount; }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
 }

@@ -7,11 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +26,8 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -90,6 +94,20 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                 showOptionsMenu(post, position, holder.buttonMore);
             });
         }
+        String userAvatarUrl = post.getProfileImageUrl();
+        if (userAvatarUrl != null && !userAvatarUrl.isEmpty()) {
+            holder.imageViewUserAvatar.setVisibility(View.VISIBLE);
+            Glide.with(context)
+                    .load(post.getProfileImageUrl())
+                    .placeholder(R.drawable.placeholder)
+                    .error(R.drawable.placeholder)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(holder.imageViewUserAvatar);
+            Log.d("fafafageg","afegqgq");
+        } else {
+            holder.imageViewUserAvatar.setVisibility(View.GONE);
+            Log.d("faffafgafageg", "fqegqetg");
+        }
     }
     private void updateLikeButton(MaterialButton button, boolean isLiked) {
         button.setIconResource(isLiked ? R.drawable.likefull : R.drawable.like);
@@ -105,6 +123,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     }
 
     class PostViewHolder extends RecyclerView.ViewHolder {
+        public ImageView imageViewUserAvatar;
         TextView textViewUsername, textViewContent, textViewTimestamp;
         TextView textViewLikes, textViewComments;
         com.google.android.material.button.MaterialButton buttonLike, buttonComment, buttonShare, buttonMore;
@@ -119,6 +138,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             buttonComment = itemView.findViewById(R.id.buttonComment);
             buttonShare = itemView.findViewById(R.id.buttonShare);
             buttonMore = itemView.findViewById(R.id.buttonMore);
+            imageViewUserAvatar = itemView.findViewById(R.id.imageViewUserAvatar);
         }
     }
 
