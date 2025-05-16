@@ -126,12 +126,6 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:fitsSystemWindows="true"
-        app:headerLayout="@layout/nav_perfil"
-        app:menu="@menu/drawer"
-        app:itemIconTint="@color/design_default_color_primary_dark"
-        app:itemTextColor="@color/black"
-        app:itemShapeFillColor="@color/design_default_color_primary"
-        app:elevation="16dp"/>
+        app:menu="@menu/drawer"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>
