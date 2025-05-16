@@ -44,4 +44,6 @@
     <string name="requierePermisosGal">This function requires gallery permissions.</string>
     <string name="requierePermisosCam">This function requires cam permissions.</string>
     <string name="cambiosTardan">Changes may take a little bit to make effect.</string>
+    <string name="sinResultados">No results</string>
+    <string name="añadir">Add</string>
 </resources>

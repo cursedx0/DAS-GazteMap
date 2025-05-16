@@ -44,6 +44,7 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
     private String email;
     private String lastPfp;
     private TextView txtNombre, txtEmail;
+    private FloatingActionButton buttonPersonas;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +110,7 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
 
         });
 
+        buttonPersonas = findViewById(R.id.buttonPersonas);
         if (Objects.equals(frag, "amigos")) {
             AmigosFragment af = new AmigosFragment();
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -116,7 +118,19 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
             transaction.replace(R.id.fragmentContainer, af);
             //transaction.addToBackStack(null); //para poder regresar al fragmento anterior
             transaction.commit();
+            buttonPersonas.setVisibility(View.VISIBLE);
+        }else{
+            buttonPersonas.setVisibility(View.INVISIBLE);
         }
+
+        buttonPersonas.setOnClickListener(v -> {
+            BuscarAmigosFragment baf = new BuscarAmigosFragment();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            findViewById(R.id.fragmentContainer).setVisibility(View.VISIBLE);
+            transaction.replace(R.id.fragmentContainer, baf);
+            //transaction.addToBackStack(null); //para poder regresar al fragmento anterior
+            transaction.commit();
+        });
 
         FloatingActionButton menuButton = findViewById(R.id.menu_button);
         menuButton.setOnClickListener(view -> {
@@ -211,6 +225,7 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
                 transaction.commit();
                 navigationView.setCheckedItem(R.id.Amigos);
                 frag = "amigos";
+                buttonPersonas.setVisibility(View.VISIBLE);
             }else{ //sino simplemente cierra drawer
                 if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                     drawerLayout.closeDrawer(GravityCompat.START);
@@ -243,6 +258,7 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
                 transaction.commit();
                 navigationView.setCheckedItem(R.id.Opciones);
                 frag = "opciones";
+                buttonPersonas.setVisibility(View.INVISIBLE);
             }else{ //sino simplemente cierra drawer
                 if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                     drawerLayout.closeDrawer(GravityCompat.START);

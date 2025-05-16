@@ -92,4 +92,6 @@
     <string name="bus">Bus</string>
     <string name="opciones_bici">Opción bicicleta</string>
     <string name="bicicleta">Bicicleta</string>
+    <string name="añadir">Añadir</string>
+    <string name="sinResultados">Sin resultados.</string>
 </resources>
