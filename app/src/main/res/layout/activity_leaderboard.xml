@@ -15,8 +15,7 @@
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/texto_principal"
-            android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar">
+            android:background="@color/black">
 
             <com.google.android.material.appbar.CollapsingToolbarLayout
                 android:layout_width="match_parent"
@@ -145,7 +144,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             app:srcCompat="@drawable/menu"
-            app:backgroundTint="@color/texto_principal"
+            app:backgroundTint="@color/black"
             app:tint="@android:color/white"
             app:layout_anchorGravity="start|top"/>
 
