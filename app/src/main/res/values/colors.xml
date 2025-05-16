@@ -17,6 +17,7 @@
     <color name="texto_secundario">#616161</color>
     <color name="texto_terciario">#9E9E9E</color>
     <color name="rojo">#FF0000</color>
+    <color name="verde">#39CA31</color>
     <color name="boton_normal">#1E88E5</color>
     <color name="boton_presionado">#1565C0</color>
     <color name="texto_boton">#FFFFFF</color>
