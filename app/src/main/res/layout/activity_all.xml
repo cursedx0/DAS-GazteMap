@@ -13,19 +13,35 @@
         android:layout_height="match_parent">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/buttonAmigos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="20dp"
+            android:contentDescription="@string/menu_button"
+            android:src="@drawable/person2"
+            app:backgroundTint="@color/black"
+            app:borderWidth="0dp"
+            app:elevation="6dp"
+            app:fabSize="normal"
+            app:layout_constraintEnd_toStartOf="@+id/buttonPersonas"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@android:color/white" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/buttonSolis"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:layout_marginBottom="28dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
             android:contentDescription="@string/menu_button"
             android:src="@drawable/notifications"
             app:backgroundTint="@color/black"
             app:borderWidth="0dp"
             app:elevation="6dp"
             app:fabSize="normal"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:tint="@android:color/white" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -47,16 +63,16 @@
             android:id="@+id/buttonPersonas"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:layout_marginBottom="108dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="20dp"
             android:contentDescription="@string/menu_button"
-            android:src="@android:drawable/ic_menu_search"
+            android:src="?android:attr/actionModeWebSearchDrawable"
             app:backgroundTint="@color/black"
             app:borderWidth="0dp"
             app:elevation="6dp"
             app:fabSize="normal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/buttonSolis"
+            app:layout_constraintTop_toTopOf="parent"
             app:tint="@android:color/white" />
 
         <androidx.fragment.app.FragmentContainerView

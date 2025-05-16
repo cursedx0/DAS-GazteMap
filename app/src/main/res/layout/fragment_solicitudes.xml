@@ -18,6 +18,14 @@
         app:icon="@android:drawable/ic_popup_sync" />
 
     <!-- Lista de solicitudes -->
+    <TextView
+        android:id="@+id/textSinSoli"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="TextView"
+        android:visibility="gone" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerSolicitudes"
         android:layout_width="match_parent"

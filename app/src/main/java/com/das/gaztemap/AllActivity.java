@@ -46,6 +46,7 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
     private TextView txtNombre, txtEmail;
     private FloatingActionButton buttonPersonas;
     private FloatingActionButton buttonSolis;
+    private FloatingActionButton buttonAmigos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +114,7 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
 
         buttonPersonas = findViewById(R.id.buttonPersonas);
         buttonSolis = findViewById(R.id.buttonSolis);
+        buttonAmigos = findViewById(R.id.buttonAmigos);
         if (Objects.equals(frag, "amigos")) {
             AmigosFragment af = new AmigosFragment();
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -122,9 +124,11 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
             transaction.commit();
             buttonPersonas.setVisibility(View.VISIBLE);
             buttonSolis.setVisibility(View.VISIBLE);
+            buttonAmigos.setVisibility(View.VISIBLE);
         }else{
             buttonPersonas.setVisibility(View.INVISIBLE);
             buttonSolis.setVisibility(View.INVISIBLE);
+            buttonAmigos.setVisibility(View.INVISIBLE);
         }
 
         buttonPersonas.setOnClickListener(v -> {
@@ -141,6 +145,15 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             findViewById(R.id.fragmentContainer).setVisibility(View.VISIBLE);
             transaction.replace(R.id.fragmentContainer, sf);
+            //transaction.addToBackStack(null); //para poder regresar al fragmento anterior
+            transaction.commit();
+        });
+
+        buttonAmigos.setOnClickListener(v -> {
+            AmigosFragment af = new AmigosFragment();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            findViewById(R.id.fragmentContainer).setVisibility(View.VISIBLE);
+            transaction.replace(R.id.fragmentContainer, af);
             //transaction.addToBackStack(null); //para poder regresar al fragmento anterior
             transaction.commit();
         });
@@ -240,6 +253,7 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
                 frag = "amigos";
                 buttonPersonas.setVisibility(View.VISIBLE);
                 buttonSolis.setVisibility(View.VISIBLE);
+                buttonAmigos.setVisibility(View.VISIBLE);
             }else{ //sino simplemente cierra drawer
                 if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                     drawerLayout.closeDrawer(GravityCompat.START);
@@ -274,6 +288,7 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
                 frag = "opciones";
                 buttonPersonas.setVisibility(View.INVISIBLE);
                 buttonSolis.setVisibility(View.INVISIBLE);
+                buttonAmigos.setVisibility(View.INVISIBLE);
             }else{ //sino simplemente cierra drawer
                 if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                     drawerLayout.closeDrawer(GravityCompat.START);

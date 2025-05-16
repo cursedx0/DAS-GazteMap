@@ -49,4 +49,8 @@
     <string name="solicitudMandada">Request sent.</string>
     <string name="solicitudPendiente">Request already sent and pending.</string>
     <string name="yaAmigos">You\'re already friends with this user.</string>
+    <string name="soliAceptada">Request accepted.</string>
+    <string name="soliRechazada">Request rejected.</string>
+    <string name="soliError">An error occured while processing the request.</string>
+    <string name="sinSoli">You have no requests yet.</string>
 </resources>

@@ -72,11 +72,14 @@ public class BuscarAmigosFragment extends Fragment {
 
     private void buscarAmigos(String query) {
         listaAmigos.clear(); //aunque no sean amigos, sino personas
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+        nombre = prefs.getString("nombre","error");
         if (!query.isEmpty()) {
             Data inputData = new Data.Builder()
                     .putString("accion", "buscar_personas")
                     .putString("url","1")
-                    .putString("usuario", query)
+                    .putString("usuarioBuscado", query)
+                    .putString("usuario", nombre)
                     .build();
 
             OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(BDConnector.class)

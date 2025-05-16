@@ -44,6 +44,7 @@ import androidx.work.WorkManager;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.google.android.material.button.MaterialButton;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -60,8 +61,8 @@ public class EditarUsuarioDF extends DialogFragment {
     private OnUsuarioEditadoListener listener;
     private String nombre;
     private ImageView imgPerfil;
-    private Button buttonCam;
-    private Button buttonGallery;
+    private MaterialButton buttonCam;
+    private MaterialButton buttonGallery;
     private ActivityResultLauncher<Intent> cameraLauncher;
     private ActivityResultLauncher<Intent> galleryLauncher;
     private ActivityResultLauncher<String[]> permissionLauncher;
