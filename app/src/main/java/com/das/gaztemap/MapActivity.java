@@ -12,9 +12,11 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.Manifest;
@@ -262,17 +264,23 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     }
                 }
 
-                // Encuentra el nodo más cercano al usuario
                 LatLng nearestNode = findNearestNode(userLocation, graph);
-                Log.d("NearestNodeDebug", "Nearest node to user: " + nearestNode);
-
-                // Encuentra el nodo más cercano a la UPV
                 LatLng nearestToDestination = findNearestNode(destination, graph);
-                Log.d("NearestNodeDebug", "Nearest node to destination: " + nearestToDestination);
-
-                // Calcula la ruta más corta desde el nodo más cercano
                 List<LatLng> shortestPath = graph.getShortestPath(nearestNode, nearestToDestination);
-                Log.d("ShortestPathDebug", "Shortest path: " + shortestPath);
+
+                // Calcular distancia total
+                double totalDistance = 0.0;
+                for (int i = 0; i < shortestPath.size() - 1; i++) {
+                    totalDistance += calculateDistance(shortestPath.get(i), shortestPath.get(i + 1));
+                }
+
+                // Estimar tiempo de viaje (velocidad promedio: 15 km/h)
+                double averageSpeed = 15.0; // km/h
+                double totalTimeHours = totalDistance / averageSpeed;
+                int totalMinutes = (int) (totalTimeHours * 60);
+
+                String distanceText = String.format("%.2f km", totalDistance);
+                String durationText = totalMinutes + " min";
 
                 runOnUiThread(() -> {
                     for (GeoJsonFeature feature : layer.getFeatures()) {
@@ -283,7 +291,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                 LatLng start = points.get(i);
                                 LatLng end = points.get(i + 1);
 
-                                // Verificar si el segmento (start -> end) está en el shortestPath
                                 boolean isPartOfShortestPath = false;
                                 for (int j = 0; j < shortestPath.size() - 1; j++) {
                                     LatLng pathStart = shortestPath.get(j);
@@ -296,7 +303,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                     }
                                 }
 
-                                // Dibujar solo el segmento necesario
                                 PolylineOptions segmentPolyline = new PolylineOptions()
                                         .add(start, end)
                                         .width(10)
@@ -306,6 +312,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                             }
                         }
                     }
+
+                    // Mostrar diálogo con distancia y tiempo
+                    showDistanceTimeDialog(distanceText, durationText);
                 });
 
             } catch (Exception e) {
@@ -317,14 +326,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private void loadWalkingRoute(LatLng userLocation, LatLng destination) {
         new Thread(() -> {
             try {
-                // Construir la URL para la API de Google Directions
-                String apiKey = "AIzaSyBBeagiyy4wY0h1RnbKgoK7kpadmYAhU1o"; // Asegúrate de tener tu API Key en strings.xml
+                String apiKey = "AIzaSyBBeagiyy4wY0h1RnbKgoK7kpadmYAhU1o";
                 String url = "https://maps.googleapis.com/maps/api/directions/json?origin="
                         + userLocation.latitude + "," + userLocation.longitude
                         + "&destination=" + destination.latitude + "," + destination.longitude
                         + "&mode=walking&key=" + apiKey;
 
-                // Realizar la solicitud HTTP
                 OkHttpClient client = new OkHttpClient();
                 Request request = new Request.Builder().url(url).build();
                 Response response = client.newCall(request).execute();
@@ -333,24 +340,29 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     String responseData = response.body().string();
                     JSONObject jsonResponse = new JSONObject(responseData);
 
-                    // Verificar si hay rutas disponibles
                     if ("OK".equals(jsonResponse.getString("status"))) {
                         JSONArray routes = jsonResponse.getJSONArray("routes");
                         JSONObject route = routes.getJSONObject(0);
                         JSONObject overviewPolyline = route.getJSONObject("overview_polyline");
                         String encodedPolyline = overviewPolyline.getString("points");
 
-                        // Decodificar la polilínea
+                        // Obtener distancia y duración
+                        JSONObject leg = route.getJSONArray("legs").getJSONObject(0);
+                        String distance = leg.getJSONObject("distance").getString("text");
+                        String duration = leg.getJSONObject("duration").getString("text");
+
                         List<LatLng> path = decodePolyline(encodedPolyline);
 
-                        // Dibujar la ruta en el mapa
                         runOnUiThread(() -> {
+                            // Dibujar la ruta
                             PolylineOptions polylineOptions = new PolylineOptions()
                                     .addAll(path)
                                     .width(10)
                                     .color(Color.BLUE);
                             mMap.addPolyline(polylineOptions);
-                            Toast.makeText(MapActivity.this, "Ruta a pie calculada.", Toast.LENGTH_SHORT).show();
+
+                            // Mostrar diálogo con distancia y tiempo
+                            showDistanceTimeDialog(distance, duration);
                         });
                     } else {
                         runOnUiThread(() -> Toast.makeText(MapActivity.this, "No hay rutas disponibles.", Toast.LENGTH_SHORT).show());
@@ -396,6 +408,38 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         }
 
         return poly;
+    }
+
+    private void showDistanceTimeDialog(String distance, String duration) {
+        LinearLayout dialog = new LinearLayout(this);
+        dialog.setOrientation(LinearLayout.VERTICAL);
+        dialog.setBackgroundResource(R.drawable.dialog_redonde);
+        dialog.setPadding(32, 32, 32, 32);
+
+        TextView distanceText = new TextView(this);
+        distanceText.setText("Distancia: " + distance);
+        distanceText.setTextSize(16);
+        distanceText.setTextColor(Color.BLACK);
+
+        TextView durationText = new TextView(this);
+        durationText.setText("Duración: " + duration);
+        durationText.setTextSize(16);
+        durationText.setTextColor(Color.BLACK);
+
+        dialog.addView(distanceText);
+        dialog.addView(durationText);
+
+        // Configurar las propiedades de diseño
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.gravity = Gravity.BOTTOM | Gravity.END;
+        params.setMargins(32, 32, 32, 32);
+
+        // Añadir el diálogo al contenedor raíz
+        FrameLayout rootLayout = findViewById(android.R.id.content);
+        rootLayout.addView(dialog, params);
     }
 
     private void loadBusRoute(LatLng userLocation, LatLng destination) {
