@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="azul_clarito">#64B5F6</color>
+    <color name="azul_600">#42A5F5</color>
+    <color name="azul_800">#1976D2</color>
+    <color name="gris_azulado_200">#546E7A</color>
+    <color name="gris_azulado_700">#37474F</color>
+    <color name="negro">#000000</color>
+    <color name="blanco">#FFFFFF</color>
+
+    <color name="gris_claro_fondo">#121212</color>
+    <color name="gris_medio">#9E9E9E</color>
+
+    <color name="texto_principal">#E0E0E0</color>
+    <color name="texto_secundario">#B0B0B0</color>
+    <color name="texto_terciario">#616161</color>
+
+    <color name="rojo">#CF6679</color>
+    <color name="boton_normal">#42A5F5</color>
+    <color name="boton_presionado">#1976D2</color>
+    <color name="texto_boton">#FFFFFF</color>
+
+    <color name="widget_fondo">#1E1E1E</color>
+    <color name="widget_texto_nombre">#E0E0E0</color>
+    <color name="widget_texto_precio">#81C784</color>
+    <color name="widget_texto_fecha">#90A4AE</color>
+
+    <color name="mensaje_enviado_background">#0D47A1</color>
+    <color name="mensaje_recibido_background">#2D2D2D</color>
+    <color name="nombre_remitente">#7986CB</color>
+</resources>
