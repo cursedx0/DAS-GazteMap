@@ -68,22 +68,24 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
     private ProgressBar loadingView;
     private RequestQueue requestQueue;
 
+    // Add state variables for user rank information
+    private int userRank = -1;
+    private int userPoints = 0;
+    private String userImageUrl = "";
+
     private static final String KEY_USER_LIST = "user_list";
     private static final String KEY_SELECTED_TAB = "selected_tab";
+    // Add keys for saving user rank state
+    private static final String KEY_USER_RANK = "user_rank";
+    private static final String KEY_USER_POINTS = "user_points";
+    private static final String KEY_USER_IMAGE_URL = "user_image_url";
+    private static final String KEY_USER_RANK_LOADED = "user_rank_loaded";
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_leaderboard);
-
-        if (savedInstanceState != null) {
-            userList = (ArrayList<LeaderboardUser>) savedInstanceState.getSerializable(KEY_USER_LIST);
-            int selectedTab = savedInstanceState.getInt(KEY_SELECTED_TAB, 0);
-            if (tabLayout != null && selectedTab < tabLayout.getTabCount()) {
-                tabLayout.getTabAt(selectedTab).select();
-            }
-        }
 
         requestQueue = Volley.newRequestQueue(this);
         nombre = getIntent().getStringExtra("nombre");
@@ -100,6 +102,9 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
 
         recyclerView = findViewById(R.id.recycler_leaderboard);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // Initialize the adapter here regardless of state
+        userList = new ArrayList<>();
         adapter = new LeaderboardAdapter(this, userList);
         recyclerView.setAdapter(adapter);
 
@@ -111,12 +116,43 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
             tabLayout.addTab(tabLayout.newTab().setText(R.string.diario));
         }
 
-        if (userList.isEmpty() && savedInstanceState == null) {
-            loadLeaderboardData(tabLayout.getSelectedTabPosition());
-            loadCurrentUserRank();
-        } else {
+        // Handle restored state
+        if (savedInstanceState != null) {
+            ArrayList<LeaderboardUser> savedList = (ArrayList<LeaderboardUser>) savedInstanceState.getSerializable(KEY_USER_LIST);
+            if (savedList != null && !savedList.isEmpty()) {
+                userList.clear();
+                userList.addAll(savedList);
+                adapter.notifyDataSetChanged();
+            }
+
+            int selectedTab = savedInstanceState.getInt(KEY_SELECTED_TAB, 0);
+            if (tabLayout != null && selectedTab < tabLayout.getTabCount()) {
+                tabLayout.getTabAt(selectedTab).select();
+            }
+
+            // Restore user rank information
+            userRank = savedInstanceState.getInt(KEY_USER_RANK, -1);
+            userPoints = savedInstanceState.getInt(KEY_USER_POINTS, 0);
+            userImageUrl = savedInstanceState.getString(KEY_USER_IMAGE_URL, "");
+            boolean userRankLoaded = savedInstanceState.getBoolean(KEY_USER_RANK_LOADED, false);
+
+            // Si tenemos información guardada del rango de usuario, actualizamos la UI
+            if (userRankLoaded) {
+                updateUserRankUI();
+            }
+
+            // Update UI states based on the restored data
             showLoading(false);
             showEmptyState(userList.isEmpty());
+
+            // If needed, load user rank data
+            if (userRank == -1) {
+                loadCurrentUserRank();
+            }
+        } else {
+            // Initial data loading
+            loadLeaderboardData(tabLayout.getSelectedTabPosition());
+            loadCurrentUserRank();
         }
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -138,8 +174,45 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(KEY_USER_LIST, new ArrayList<>(userList));
+
+        // Guardar los datos del leaderboard
+        // Utilizamos una nueva lista para evitar problemas de serialización
+        ArrayList<LeaderboardUser> listToSave = new ArrayList<>(userList);
+        outState.putSerializable(KEY_USER_LIST, listToSave);
+
+        // Guardar la pestaña seleccionada
         outState.putInt(KEY_SELECTED_TAB, tabLayout.getSelectedTabPosition());
+
+        // Guardar la información del rango de usuario
+        outState.putInt(KEY_USER_RANK, userRank);
+        outState.putInt(KEY_USER_POINTS, userPoints);
+        outState.putString(KEY_USER_IMAGE_URL, userImageUrl);
+        outState.putBoolean(KEY_USER_RANK_LOADED, userRank != -1);
+
+        Log.d(TAG, "onSaveInstanceState: Saving state with " + listToSave.size() + " leaderboard items");
+    }
+
+    // Add method to update user rank UI
+    private void updateUserRankUI() {
+        if (userRank > 0) {
+            tvUserRank.setText(String.format(getString(R.string.rank), userRank));
+            tvUserPoints.setText(String.format(getString(R.string.points_cantidad), userPoints));
+
+            if (!userImageUrl.isEmpty() && !userImageUrl.equals("null")) {
+                Glide.with(LeaderboardActivity.this)
+                        .load(userImageUrl)
+                        .placeholder(R.drawable.placeholder)
+                        .error(R.drawable.placeholder)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true)
+                        .into(userProfileImageCard);
+            } else {
+                userProfileImageCard.setImageResource(R.drawable.placeholder);
+            }
+            userRankCard.setVisibility(View.VISIBLE);
+        } else {
+            userRankCard.setVisibility(View.GONE);
+        }
     }
 
     private void setupNavigation() {
@@ -278,25 +351,13 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
                         String status = jsonResponse.getString("status");
 
                         if (status.equals("success")) {
-                            int rank = jsonResponse.getInt("rank");
-                            int points = jsonResponse.getInt("points");
-                            String imageUrl = jsonResponse.optString("profile_image", "");
+                            // Store the data in member variables
+                            userRank = jsonResponse.getInt("rank");
+                            userPoints = jsonResponse.getInt("points");
+                            userImageUrl = jsonResponse.optString("profile_image", "");
 
-                            tvUserRank.setText(String.format(getString(R.string.rank), rank));
-                            tvUserPoints.setText(String.format(getString(R.string.points_cantidad), points));
-
-                            if (!imageUrl.isEmpty() && !imageUrl.equals("null")) {
-                                Glide.with(LeaderboardActivity.this)
-                                        .load(imageUrl)
-                                        .placeholder(R.drawable.placeholder)
-                                        .error(R.drawable.placeholder)
-                                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                        .skipMemoryCache(true)
-                                        .into(userProfileImageCard);
-                            } else {
-                                userProfileImageCard.setImageResource(R.drawable.placeholder);
-                            }
-                            userRankCard.setVisibility(View.VISIBLE);
+                            // Update the UI with new data
+                            updateUserRankUI();
                         } else {
                             Log.e(TAG, "Error getting user rank (API): " + jsonResponse.optString("message", "Unknown API error"));
                             userRankCard.setVisibility(View.GONE);
@@ -333,6 +394,9 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
             String status = jsonResponse.getString("status");
 
             if (status.equals("success")) {
+                // Limpiar la lista anterior
+                userList.clear();
+
                 JSONArray usersArray = jsonResponse.getJSONArray("users");
                 int userPositionInTopList = -1;
 
@@ -352,10 +416,11 @@ public class LeaderboardActivity extends AppCompatActivity implements Navigation
                     userList.add(user);
                 }
 
+                // Notificar al adaptador que los datos han cambiado
                 adapter.notifyDataSetChanged();
                 showEmptyState(userList.isEmpty());
 
-
+                Log.d(TAG, "parseLeaderboardData: Loaded " + userList.size() + " users");
 
             } else {
                 showEmptyState(true);
