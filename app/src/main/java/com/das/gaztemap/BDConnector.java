@@ -451,8 +451,9 @@ public class BDConnector extends Worker {
                         JSONObject jsonParam = new JSONObject();
                         jsonParam.put("accion", accion);
 
-                        if(getInputData().getString("usuario")!=null){
+                        if(getInputData().getString("usuario")!=null && getInputData().getString("usuarioBuscado")!=null){
                             jsonParam.put("usuario", getInputData().getString("usuario"));
+                            jsonParam.put("usuarioBuscado", getInputData().getString("usuarioBuscado"));
                             paramsValidos = true;
                         }
 
