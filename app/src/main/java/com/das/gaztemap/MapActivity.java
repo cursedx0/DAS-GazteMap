@@ -93,7 +93,7 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
 
     private LinearLayout transportOptions;
     private LinearLayout optionWalking, optionBus, optionBicycle;
-    private String selectedTransportMode = "bicycle"; // valor por defecto
+    private String selectedTransportMode = "walking"; // valor por defecto
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -192,7 +192,6 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
         layersButton = findViewById(R.id.layers_button);
         layersButton.setOnClickListener(view -> {
             Toast.makeText(MapActivity.this, "Botón de capas presionado", Toast.LENGTH_SHORT).show();
-            // Aquí puedes agregar la funcionalidad deseada
         });
     }
 
@@ -451,9 +450,102 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
     }
 
     private void loadBusRoute(LatLng userLocation, LatLng destination) {
-        runOnUiThread(() -> {
-            Toast.makeText(MapActivity.this, getString(R.string.bus), Toast.LENGTH_SHORT).show();
-        });
+        new Thread(() -> {
+            try {
+                // Configurar OkHttpClient con tiempos de espera personalizados
+                OkHttpClient client = new OkHttpClient.Builder()
+                        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS) // Tiempo de espera para conectar
+                        .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)    // Tiempo de espera para leer
+                        .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)   // Tiempo de espera para escribir
+                        .build();
+
+                // Primera llamada: Obtener paradas cercanas al campus
+                String urlParadas = "http://ec2-51-44-167-78.eu-west-3.compute.amazonaws.com/lbilbao040/WEB/GazteMap/api_bus.php?accion=paradasCampus";
+                Request requestParadas = new Request.Builder().url(urlParadas).build();
+                Response responseParadas = client.newCall(requestParadas).execute();
+
+                if (responseParadas.isSuccessful()) {
+                    String responseDataParadas = responseParadas.body().string();
+                    Log.d("MapActivity", "Respuesta de paradas: " + responseDataParadas);
+                    JSONArray paradasArray = new JSONArray(responseDataParadas);
+
+                    // Encontrar la parada más cercana al usuario
+                    String nearestStopId = null;
+                    double minDistance = Double.MAX_VALUE;
+                    String nearestStopName = null; // Para registrar el nombre de la parada más cercana
+
+                    for (int i = 0; i < paradasArray.length(); i++) {
+                        JSONObject parada = paradasArray.getJSONObject(i);
+                        double stopLat = parada.getDouble("stop_lat");
+                        double stopLon = parada.getDouble("stop_lon");
+                        LatLng stopLocation = new LatLng(stopLat, stopLon);
+
+                        double distance = calculateDistance(userLocation, stopLocation);
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            nearestStopId = parada.getString("stop_id");
+                            nearestStopName = parada.getString("stop_name"); // Guardar el nombre de la parada más cercana
+                        }
+                    }
+
+                    // Registrar solo la parada más cercana
+                    if (nearestStopId != null) {
+                        Log.d("MapActivity", "Parada más cercana: " + nearestStopName + " (ID: " + nearestStopId + ")");
+                    }
+                    if (nearestStopId == null) {
+                        Log.e("MapActivity", "No se encontró una parada cercana.");
+                        runOnUiThread(() -> Toast.makeText(MapActivity.this, "No se encontró una parada cercana.", Toast.LENGTH_SHORT).show());
+                        return;
+                    }
+
+                    // Segunda llamada: Obtener el recorrido desde la parada más cercana
+                    String urlRecorrido = "http://ec2-51-44-167-78.eu-west-3.compute.amazonaws.com/lbilbao040/WEB/GazteMap/api_bus.php?accion=recorrido&origen=" + nearestStopId;
+                    Request requestRecorrido = new Request.Builder().url(urlRecorrido).build();
+                    Response responseRecorrido = client.newCall(requestRecorrido).execute();
+
+                    if (responseRecorrido.isSuccessful()) {
+                        String responseDataRecorrido = responseRecorrido.body().string();
+                        Log.d("MapActivity", "Respuesta de recorrido: " + responseDataRecorrido); // Log del JSON de recorrido
+                        JSONObject recorridoData = new JSONObject(responseDataRecorrido);
+
+                        // Extraer información del recorrido
+                        JSONArray recorridoShape = recorridoData.getJSONArray("recorrido_shape");
+                        String duracion = recorridoData.getString("duracion_aproximada_min");
+                        String proximaSalida = recorridoData.getString("proxima_salida");
+
+                        List<LatLng> path = new ArrayList<>();
+                        for (int i = 0; i < recorridoShape.length(); i++) {
+                            JSONObject point = recorridoShape.getJSONObject(i);
+                            double lat = point.getDouble("lat");
+                            double lon = point.getDouble("lon");
+                            path.add(new LatLng(lat, lon));
+                        }
+
+                        // Dibujar la ruta en el mapa
+                        runOnUiThread(() -> {
+                            PolylineOptions polylineOptions = new PolylineOptions()
+                                    .addAll(path)
+                                    .width(10)
+                                    .color(Color.BLUE);
+                            mMap.addPolyline(polylineOptions);
+
+                            // Mostrar información del recorrido
+                            String info = "Duración: " + duracion + " min\nPróxima salida: " + proximaSalida;
+                            Toast.makeText(MapActivity.this, info, Toast.LENGTH_LONG).show();
+                        });
+                    } else {
+                        Log.e("MapActivity", "Error al obtener el recorrido.");
+                        runOnUiThread(() -> Toast.makeText(MapActivity.this, "Error al obtener el recorrido.", Toast.LENGTH_SHORT).show());
+                    }
+                } else {
+                    Log.e("MapActivity", "Error al obtener las paradas.");
+                    runOnUiThread(() -> Toast.makeText(MapActivity.this, "Error al obtener las paradas.", Toast.LENGTH_SHORT).show());
+                }
+            } catch (Exception e) {
+                Log.e("MapActivity", "Error al cargar la ruta en bus", e);
+                runOnUiThread(() -> Toast.makeText(MapActivity.this, "Error al cargar la ruta en bus.", Toast.LENGTH_SHORT).show());
+            }
+        }).start();
     }
 
     private LatLng findNearestNode(LatLng userLocation, Graph graph) {
