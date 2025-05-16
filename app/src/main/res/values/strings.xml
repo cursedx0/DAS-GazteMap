@@ -86,6 +86,7 @@
 
 
     <string name="boton_trans">Opciones de transporte</string>
+    <string name="layers_button">Opcion de ver mapa entero</string>
     <string name="opciones_patita">Opción andando</string>
     <string name="patita">Andando</string>
     <string name="opciones_bus">Opción bus</string>

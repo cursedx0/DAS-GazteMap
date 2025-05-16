@@ -89,6 +89,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private TextView txtNombre, txtEmail;
 
     private FloatingActionButton transportButton;
+    private FloatingActionButton layersButton;
+
     private LinearLayout transportOptions;
     private LinearLayout optionWalking, optionBus, optionBicycle;
     private String selectedTransportMode = "bicycle"; // valor por defecto
@@ -186,6 +188,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
+
+        layersButton = findViewById(R.id.layers_button);
+        layersButton.setOnClickListener(view -> {
+            Toast.makeText(MapActivity.this, "Botón de capas presionado", Toast.LENGTH_SHORT).show();
+            // Aquí puedes agregar la funcionalidad deseada
+        });
     }
 
     private void updateTransportIcon() {
