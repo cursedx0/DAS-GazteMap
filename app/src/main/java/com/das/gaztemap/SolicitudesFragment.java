@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -30,6 +32,7 @@ public class SolicitudesFragment extends Fragment {
     private SolicitudesAdapter adapter;
     private List<Amigo> listaSolicitudes = new ArrayList<>();
     private String nombre;
+    private TextView txtSinSoli;
 
     @Nullable
     @Override
@@ -54,6 +57,7 @@ public class SolicitudesFragment extends Fragment {
         });
         recyclerView.setAdapter(adapter);
 
+        txtSinSoli = view.findViewById(R.id.textSinSoli);
         cargarSolicitudes();
 
         Button buttonUpdate = view.findViewById(R.id.btnUpdate);
@@ -84,6 +88,12 @@ public class SolicitudesFragment extends Fragment {
                         String json = workInfo.getOutputData().getString("solis");
                         listaSolicitudes.clear();
                         listaSolicitudes.addAll(parsearJson(json));
+                        if(listaSolicitudes.isEmpty()){
+                            txtSinSoli.setText(getString(R.string.sinSoli));
+                            txtSinSoli.setVisibility(View.VISIBLE);
+                        }else{
+                            txtSinSoli.setVisibility(View.GONE);
+                        }
                         adapter.notifyDataSetChanged();
                     }
                 });
@@ -96,12 +106,18 @@ public class SolicitudesFragment extends Fragment {
     }
 
     private void responderSolicitud(String nombreRemitente, boolean aceptar) {
+        String a = "";
+        if(aceptar){ //en php es más sencillo usar parámetros string
+            a = "true";
+        }else{
+            a = "false";
+        }
         Data inputData = new Data.Builder()
-                .putString("accion", "responder_solicitud")
+                .putString("accion", "responder_soli")
                 .putString("url", "1")
                 .putString("usuario", nombre)
                 .putString("remitente", nombreRemitente)
-                .putBoolean("aceptar", aceptar)
+                .putString("aceptar", a)
                 .build();
 
         OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(BDConnector.class)
@@ -109,6 +125,20 @@ public class SolicitudesFragment extends Fragment {
                 .build();
 
         WorkManager.getInstance(requireContext()).enqueue(request);
+        WorkManager.getInstance(requireContext()).getWorkInfoByIdLiveData(request.getId())
+                .observe(getViewLifecycleOwner(), workInfo -> {
+                    if (workInfo != null && workInfo.getState().isFinished()) {
+                        String codigo = workInfo.getOutputData().getString("code");
+                        if(codigo.equals("00")){
+                            Toast.makeText(getContext(), getString(R.string.soliAceptada), Toast.LENGTH_SHORT).show();
+                        }else if (codigo.equals("0")){
+                            Toast.makeText(getContext(), getString(R.string.soliRechazada), Toast.LENGTH_SHORT).show();
+                        }else{
+                            Toast.makeText(getContext(), getString(R.string.soliError), Toast.LENGTH_SHORT).show();
+                        }
+                        cargarSolicitudes();
+                    }
+                });
     }
 }
 

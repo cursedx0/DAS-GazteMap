@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
@@ -25,6 +26,7 @@ public class AmigosFragment extends Fragment {
     private RecyclerView recyclerView;
     private AmigosAdapter adapter;
     private List<Amigo> amigosList = new ArrayList<>();
+    private TextView txtSinAmigos;
 
     public AmigosFragment() {
         // Required empty constructor
@@ -40,6 +42,8 @@ public class AmigosFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         cargarAmigosDesdeServidor();
+
+        txtSinAmigos = view.findViewById(R.id.textSinAmigos);
 
         return view;
     }
@@ -67,10 +71,13 @@ public class AmigosFragment extends Fragment {
                         amigosList.clear();
                         amigosList.addAll(parsearJson(json));
                         Log.d("AMIGOS",amigosList.toString());
-                        adapter.notifyDataSetChanged();
                         if(amigosList.isEmpty()){
-                            Toast.makeText(requireContext(), getString(R.string.sinAmigos), Toast.LENGTH_LONG).show();
+                            txtSinAmigos.setText(getString(R.string.sinAmigos));
+                            txtSinAmigos.setVisibility(View.VISIBLE);
+                        }else{
+                            txtSinAmigos.setVisibility(View.GONE);
                         }
+                        adapter.notifyDataSetChanged();
                     }
                 });
     }

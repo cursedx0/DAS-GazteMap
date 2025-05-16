@@ -97,4 +97,8 @@
     <string name="solicitudMandada">Se ha mandado la solicitud.</string>
     <string name="solicitudPendiente">La solicitud sigue pendiente.</string>
     <string name="yaAmigos">Ya eres amigo de este usuario.</string>
+    <string name="soliAceptada">Solicitud aceptada.</string>
+    <string name="soliRechazada">Solicitud rechazada.</string>
+    <string name="soliError">Error al procesar solicitud.</string>
+    <string name="sinSoli">No tienes solicitudes todavía.</string>
 </resources>

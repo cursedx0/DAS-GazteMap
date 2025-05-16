@@ -646,6 +646,77 @@ public class BDConnector extends Worker {
                                 .putString("code", "-1")
                                 .build());
                     } //break
+                case "responder_soli": //verificar usuario, para inicio de sesión
+                    //POST
+                    HttpURLConnection urlConnectionRS = null;
+                    URL destinoRS = null;
+                    try {
+                        destinoRS = new URL(direccion);
+                        urlConnectionLogin = (HttpURLConnection) destinoRS.openConnection();
+                        urlConnectionLogin.setConnectTimeout(5000);
+                        urlConnectionLogin.setReadTimeout(5000);
+                        urlConnectionLogin.setRequestMethod("POST");
+                        urlConnectionLogin.setDoOutput(true);
+                        urlConnectionLogin.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+
+                        //crear JSON con los parámetros
+                        JSONObject jsonParam = new JSONObject();
+                        jsonParam.put("accion", accion);
+
+                        if(getInputData().getString("usuario")!=null && getInputData().getString("remitente")!=null && getInputData().getString("aceptar")!=null){
+                            jsonParam.put("usuario", getInputData().getString("usuario"));
+                            jsonParam.put("remitente", getInputData().getString("remitente"));
+                            jsonParam.put("aceptar", getInputData().getString("aceptar"));
+                            paramsValidos = true;
+                        }
+
+                        Log.d("WORKER", "JSON definido");
+                        Log.d("WORKER", "JSON a enviar: " + jsonParam.toString());
+                        if (paramsValidos) {
+                            //escribir el JSON en el cuerpo de la solicitud
+                            OutputStream os = urlConnectionLogin.getOutputStream();
+                            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+                            writer.write(jsonParam.toString());
+                            writer.flush();
+                            writer.close();
+                            os.close();
+
+                            //enviar la solicitud y recibir la respuesta
+                            int responseCode = urlConnectionLogin.getResponseCode();
+                            if (responseCode == HttpURLConnection.HTTP_OK) {
+                                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnectionLogin.getInputStream(), StandardCharsets.UTF_8));
+                                StringBuilder response = new StringBuilder();
+                                String line;
+                                while ((line = br.readLine()) != null) {
+                                    response.append(line);
+                                }
+                                br.close();
+
+                                //parsear respuesta JSON
+                                JSONObject respuestaJson = new JSONObject(response.toString());
+                                String mensaje = respuestaJson.optString("message", "Sin mensaje");
+                                String codigo = respuestaJson.optString("code", "-1");
+                                JSONArray amigosArray = respuestaJson.optJSONArray("personas");
+
+                                Log.d("RESPUESTA", response.toString()); // Imprimir respuesta del servidor
+                                return Result.success(new Data.Builder()
+                                        .putString("message", mensaje)
+                                        .putString("code", codigo)
+                                        .build());
+                            } else {
+                                Log.e("ERROR", "Error en la solicitud: " + responseCode);
+                                return Result.failure();
+                            }
+                        }else{
+                            return Result.failure();
+                        }
+                    } catch (IOException | JSONException e) {
+                        Log.e("WORKER", "Excepción en doWork: " + e.getMessage(), e);
+                        return Result.failure(new Data.Builder()
+                                .putString("message", "Excepción: " + e.getMessage())
+                                .putString("code", "-1")
+                                .build());
+                    } //break
 
                 case "monedas":
                     HttpURLConnection urlConnectionMonedas = null;

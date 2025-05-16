@@ -49,4 +49,8 @@
     <string name="solicitudMandada">Eskaera bidali da.</string>
     <string name="solicitudPendiente">Pertsona honek ez du zure eskaera ikusi oraindik.</string>
     <string name="yaAmigos">Pertsona hau zure laguna da jada.</string>
+    <string name="soliAceptada">Eskaera onartu duzu.</string>
+    <string name="soliRechazada">Eskaera ezeztatu duzu.</string>
+    <string name="soliError">Arazoak eskaera prozesatukoan.</string>
+    <string name="sinSoli">Ez daukazu eskaerarik oraindik.</string>
 </resources>

@@ -25,11 +25,11 @@
 
     <Button
         android:id="@+id/btnAceptarSolicitud"
-        android:layout_width="71dp"
+        android:layout_width="64dp"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/verde"
         android:textColorLink="@color/blanco"
-        app:icon="?android:attr/textCheckMark"
+        app:icon="@drawable/check_24dp"
         app:iconTint="@color/blanco" />
 
     <Button
@@ -38,6 +38,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:backgroundTint="@color/rojo"
-        app:icon="@android:drawable/ic_menu_close_clear_cancel" />
+        app:icon="@drawable/close_24dp" />
 </LinearLayout>
 
