@@ -335,7 +335,8 @@ public class ForumActivity extends AppCompatActivity implements NavigationView.O
                             String.valueOf(hilo.getInt("userId")),
                             hilo.getString("userName"),
                             hilo.getString("content"),
-                            hilo.getLong("timestamp") * 1000
+                            hilo.getLong("timestamp") * 1000,
+                            hilo.getString("profile_image")
                     );
                     post.setLikeCount(hilo.getInt("likeCount"));
                     post.setCommentCount(hilo.getInt("commentCount"));
