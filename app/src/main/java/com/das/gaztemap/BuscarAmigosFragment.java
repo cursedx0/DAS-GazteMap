@@ -1,6 +1,8 @@
 package com.das.gaztemap;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -33,6 +35,7 @@ public class BuscarAmigosFragment extends Fragment {
     private RecyclerView recyclerView;
     private PersonasAdapter adapter;
     private List<Amigo> listaAmigos = new ArrayList<>();
+    private String nombre;
 
     @Nullable
     @Override
@@ -44,7 +47,10 @@ public class BuscarAmigosFragment extends Fragment {
         buscador = view.findViewById(R.id.editBuscar);
         recyclerView = view.findViewById(R.id.recyclerAmigos);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new PersonasAdapter(listaAmigos, requireContext());
+        adapter = new PersonasAdapter(listaAmigos, requireContext(),persona -> {
+            // Aquí va la lógica de añadir amigo, por ejemplo:
+            enviarSolicitudAmistad(persona.getNombre());
+        });
         recyclerView.setAdapter(adapter);
 
         buscador.addTextChangedListener(new TextWatcher() {
@@ -102,6 +108,42 @@ public class BuscarAmigosFragment extends Fragment {
         Gson gson = new Gson();
         TypeToken<List<Amigo>> typeToken = new TypeToken<List<Amigo>>() {}; //se reutiliza la clase amigo por conveniencia
         return gson.fromJson(json, typeToken.getType());
+    }
+
+    private void enviarSolicitudAmistad(String nombrePersona) {
+        //lógica de solicitud
+        Log.d("SOLICITANTE","ACCIONADO");
+        if (!nombrePersona.isEmpty()) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+            nombre = prefs.getString("nombre","error");
+            Data inputData = new Data.Builder()
+                    .putString("accion", "enviar_soli")
+                    .putString("url","1")
+                    .putString("usuarioSolicitado", nombrePersona)
+                    .putString("usuario",nombre)
+                    .build();
+
+            OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(BDConnector.class)
+                    .setInputData(inputData)
+                    .build();
+
+            WorkManager.getInstance(requireContext()).enqueue(request);
+            WorkManager.getInstance(requireContext()).getWorkInfoByIdLiveData(request.getId())
+                    .observe(getViewLifecycleOwner(), workInfo -> {
+                        if (workInfo != null && workInfo.getState().isFinished()) {
+                            String codigo = workInfo.getOutputData().getString("code");
+                            if(codigo.equals("0")){
+                                Toast.makeText(getContext(), getString(R.string.solicitudMandada), Toast.LENGTH_SHORT).show();
+                            }else if(codigo.equals("3")){
+                                Toast.makeText(getContext(), getString(R.string.solicitudPendiente), Toast.LENGTH_SHORT).show();
+                            }else if(codigo.equals("4")){
+                                Toast.makeText(getContext(), getString(R.string.yaAmigos), Toast.LENGTH_SHORT).show();
+                            }
+
+                        }
+                    });
+
+        }
     }
 }
 

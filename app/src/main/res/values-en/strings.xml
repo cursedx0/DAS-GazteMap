@@ -46,4 +46,7 @@
     <string name="cambiosTardan">Changes may take a little bit to make effect.</string>
     <string name="sinResultados">No results</string>
     <string name="añadir">Add</string>
+    <string name="solicitudMandada">Request sent.</string>
+    <string name="solicitudPendiente">Request already sent and pending.</string>
+    <string name="yaAmigos">You\'re already friends with this user.</string>
 </resources>

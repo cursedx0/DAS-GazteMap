@@ -20,10 +20,12 @@ public class PersonasAdapter extends RecyclerView.Adapter<PersonasAdapter.Person
 
     private List<Amigo> lista;
     private Context context;
+    private static OnPersonaClickListener listener;
 
-    public PersonasAdapter(List<Amigo> lista, Context context) {
+    public PersonasAdapter(List<Amigo> lista, Context context, OnPersonaClickListener listener) {
         this.lista = lista;
         this.context = context;
+        this.listener = listener;
     }
 
     @NonNull
@@ -31,6 +33,7 @@ public class PersonasAdapter extends RecyclerView.Adapter<PersonasAdapter.Person
     public PersonaViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View vista = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_persona, parent, false);
+        //buttonAdd = vista.findViewById(R.id.btnSolicitar);
         return new PersonaViewHolder(vista);
     }
 
@@ -44,10 +47,12 @@ public class PersonasAdapter extends RecyclerView.Adapter<PersonasAdapter.Person
                 .placeholder(R.drawable.placeholder)
                 .into(holder.imagen);
 
+        /*
         holder.botonEnviar.setOnClickListener(v -> {
             // Aquí deberías lanzar una solicitud al servidor para enviar solicitud de amistad
             Toast.makeText(context, "Solicitud enviada a " + amigo.getNombre(), Toast.LENGTH_SHORT).show();
-        });
+        });*/
+        holder.bind(amigo);
     }
 
     @Override
@@ -65,6 +70,13 @@ public class PersonasAdapter extends RecyclerView.Adapter<PersonasAdapter.Person
             imagen = itemView.findViewById(R.id.imgPersona);
             nombre = itemView.findViewById(R.id.txtNombre);
             botonEnviar = itemView.findViewById(R.id.btnSolicitar);
+        }
+        void bind(Amigo persona) {
+            botonEnviar.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onAgregarClick(persona);
+                }
+            });
         }
     }
 }

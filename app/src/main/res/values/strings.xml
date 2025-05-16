@@ -94,4 +94,7 @@
     <string name="bicicleta">Bicicleta</string>
     <string name="añadir">Añadir</string>
     <string name="sinResultados">Sin resultados.</string>
+    <string name="solicitudMandada">Se ha mandado la solicitud.</string>
+    <string name="solicitudPendiente">La solicitud sigue pendiente.</string>
+    <string name="yaAmigos">Ya eres amigo de este usuario.</string>
 </resources>

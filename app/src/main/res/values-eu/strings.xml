@@ -46,4 +46,7 @@
     <string name="cambiosTardan">Aldaketak laster ikusiko dira.</string>
     <string name="sinResultados">Ez da inor ez aurkitu</string>
     <string name="añadir">Gehitu</string>
+    <string name="solicitudMandada">Eskaera bidali da.</string>
+    <string name="solicitudPendiente">Pertsona honek ez du zure eskaera ikusi oraindik.</string>
+    <string name="yaAmigos">Pertsona hau zure laguna da jada.</string>
 </resources>
