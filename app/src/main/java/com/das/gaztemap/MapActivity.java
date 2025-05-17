@@ -69,6 +69,7 @@ import java.util.Set;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.RequestBody;
 import widget.MapAppWidget;
 
 //import com.google.transit.realtime.GtfsRealtime; //mirar builld.gradle para detalles
@@ -624,6 +625,44 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
         }
     }
 
+    private void updateUserLocation(int userId, double lat, double lon) {
+        new Thread(() -> {
+            try {
+                // URL del endpoint
+                String url = "http://ec2-51-44-167-78.eu-west-3.compute.amazonaws.com/lbilbao040/WEB/GazteMap/api.php";
+
+                // Crear el JSON con los datos
+                JSONObject jsonBody = new JSONObject();
+                jsonBody.put("accion", "actualizar_ubicacion");
+                jsonBody.put("user_id", userId);
+                jsonBody.put("lat", lat);
+                jsonBody.put("lon", lon);
+
+                // Configurar la solicitud POST
+                OkHttpClient client = new OkHttpClient();
+                RequestBody body = RequestBody.create(
+                        jsonBody.toString(),
+                        okhttp3.MediaType.parse("application/json; charset=utf-8")
+                );
+                Request request = new Request.Builder()
+                        .url(url)
+                        .post(body)
+                        .build();
+
+                // Ejecutar la solicitud
+                Response response = client.newCall(request).execute();
+
+                if (response.isSuccessful()) {
+                    Log.d("MapActivity", "Ubicación actualizada correctamente.");
+                } else {
+                    Log.e("MapActivity", "Error al actualizar la ubicación: " + response.message());
+                }
+            } catch (Exception e) {
+                Log.e("MapActivity", "Error al enviar la ubicación al servidor", e);
+            }
+        }).start();
+    }
+
     private void saveBitmapToCache(Bitmap bitmap) {
         try {
             File cacheDir = getCacheDir();
@@ -657,6 +696,15 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
                     LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
                     mMap.addMarker(new MarkerOptions().position(userLocation).title("Tu ubicación"));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
+
+                    // Actualizar la ubicación del usuario en la base de datos
+                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+                    int userId = prefs.getInt("id", -1);
+                    if (userId != -1) {
+                        updateUserLocation(userId, location.getLatitude(), location.getLongitude());
+                    } else {
+                        Log.e("MapActivity", "Error: ID de usuario no encontrado en SharedPreferences.");
+                    }
 
                     // Calcular ruta inicial con el modo de transporte predeterminado
                     recalculateRoute();
