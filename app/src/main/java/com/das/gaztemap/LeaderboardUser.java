@@ -1,6 +1,12 @@
 package com.das.gaztemap;
 
-public class LeaderboardUser {
+import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
+
+public class LeaderboardUser implements Parcelable {
     private int rank;
     private boolean isCurrentUser;
 
@@ -24,6 +30,27 @@ public class LeaderboardUser {
         this.profileImageUrl = profileImageUrl;
         this.isOnline = isOnline;
     }
+
+    protected LeaderboardUser(Parcel in) {
+        rank = in.readInt();
+        isCurrentUser = in.readByte() != 0;
+        name = in.readString();
+        points = in.readInt();
+        profileImageUrl = in.readString();
+        isOnline = in.readByte() != 0;
+    }
+
+    public static final Creator<LeaderboardUser> CREATOR = new Creator<LeaderboardUser>() {
+        @Override
+        public LeaderboardUser createFromParcel(Parcel in) {
+            return new LeaderboardUser(in);
+        }
+
+        @Override
+        public LeaderboardUser[] newArray(int size) {
+            return new LeaderboardUser[size];
+        }
+    };
 
     public int getRank() {
         return rank;
@@ -72,5 +99,21 @@ public class LeaderboardUser {
 
     public void setCurrentUser(boolean currentUser) {
         isCurrentUser = currentUser;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeInt(rank);
+        dest.writeString(name);
+        dest.writeInt(points);
+        dest.writeString(profileImageUrl);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            dest.writeBoolean(isOnline);
+        }
     }
 }

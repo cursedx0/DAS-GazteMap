@@ -3,6 +3,8 @@ package com.das.gaztemap;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MenuItem;
@@ -46,7 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class LeaderboardActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class LeaderboardActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, Parcelable {
 
     private static final String TAG = "LeaderboardActivity";
     private static final String API_URL = "http://ec2-51-44-167-78.eu-west-3.compute.amazonaws.com/lbilbao040/WEB/GazteMap/leaderboard.php";
@@ -80,6 +82,29 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
     private static final String KEY_USER_IMAGE_URL = "user_image_url";
     private static final String KEY_USER_RANK_LOADED = "user_rank_loaded";
 
+    public LeaderboardActivity(){
+
+    }
+    protected LeaderboardActivity(Parcel in) {
+        nombre = in.readString();
+        email = in.readString();
+        userRank = in.readInt();
+        userPoints = in.readInt();
+        userImageUrl = in.readString();
+    }
+
+    public static final Creator<LeaderboardActivity> CREATOR = new Creator<LeaderboardActivity>() {
+        @Override
+        public LeaderboardActivity createFromParcel(Parcel in) {
+            return new LeaderboardActivity(in);
+        }
+
+        @Override
+        public LeaderboardActivity[] newArray(int size) {
+            return new LeaderboardActivity[size];
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,7 +136,9 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
         tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.lamigos)));
 
         if (savedInstanceState != null) {
-            ArrayList<LeaderboardUser> savedList = (ArrayList<LeaderboardUser>) savedInstanceState.getSerializable(KEY_USER_LIST);
+            //ArrayList<LeaderboardUser> savedList = (ArrayList<LeaderboardUser>) savedInstanceState.getSerializable(KEY_USER_LIST);
+            ArrayList<LeaderboardUser> savedList = savedInstanceState.getParcelableArrayList(KEY_USER_LIST);
+
             if (savedList != null && !savedList.isEmpty()) {
                 userList.clear();
                 userList.addAll(savedList);
@@ -164,7 +191,8 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
         super.onSaveInstanceState(outState);
 
         ArrayList<LeaderboardUser> listToSave = new ArrayList<>(userList);
-        outState.putSerializable(KEY_USER_LIST, listToSave);
+        //outState.putSerializable(KEY_USER_LIST, listToSave);
+        outState.putParcelableArrayList(KEY_USER_LIST, (ArrayList<? extends Parcelable>) userList);
         outState.putInt(KEY_SELECTED_TAB, tabLayout.getSelectedTabPosition());
         outState.putInt(KEY_USER_RANK, userRank);
         outState.putInt(KEY_USER_POINTS, userPoints);
@@ -522,5 +550,19 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
     protected void onResume() {
         super.onResume();
         navigationView.setCheckedItem(R.id.Top500);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeString(nombre);
+        dest.writeString(email);
+        dest.writeInt(userRank);
+        dest.writeInt(userPoints);
+        dest.writeString(userImageUrl);
     }
 }
