@@ -303,6 +303,7 @@ public class MainActivity extends BaseActivity {
 
                                 registerDialog.dismiss();
                                 performLogin(email, password, true);
+                                finish();
                             }
                         }
                     }
@@ -338,6 +339,7 @@ public class MainActivity extends BaseActivity {
     private void checkUserLoggedIn() {
         if (prefs.getBoolean("rember", false)) {
             navigateToMapActivity();
+            finish();
         }
     }
 
@@ -424,6 +426,8 @@ public class MainActivity extends BaseActivity {
         intent.putExtra("puntos", prefs.getInt("puntos", 0));
         intent.putExtra("email", prefs.getString("email", "error"));
         intent.putExtra("rember", true);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
+        finish();
     }
 }
