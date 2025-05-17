@@ -37,7 +37,9 @@ protobuf {
 }
 
 dependencies {
-
+    implementation libs.translate.v1701
+    implementation libs.language.id
+    implementation libs.translate
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity

@@ -44,9 +44,7 @@
         <activity
             android:name=".BaseActivity"
             android:exported="false" />
-        <activity
-            android:name=".RegisterActivity"
-            android:exported="false" />
+
         <activity android:name=".CommentsActivity"
             android:exported="false" />
         <service
