@@ -91,6 +91,10 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
     private FloatingActionButton transportButton;
     private FloatingActionButton layersButton;
 
+    private FloatingActionButton nearMeButton;
+
+    private LinearLayout distanceTimeDialog;
+
     private LinearLayout transportOptions;
     private LinearLayout optionWalking, optionBus, optionBicycle;
     private String selectedTransportMode = "walking"; // valor por defecto
@@ -193,7 +197,9 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
         layersButton.setOnClickListener(view -> {
             Toast.makeText(MapActivity.this, "Botón de capas presionado", Toast.LENGTH_SHORT).show();
         });
-    }
+
+        nearMeButton = findViewById(R.id.near_me_button);
+        nearMeButton.setOnClickListener(view -> showStartGameDialog());    }
 
     private void updateTransportIcon() {
         switch (selectedTransportMode) {
@@ -417,36 +423,49 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
         return poly;
     }
 
+
     private void showDistanceTimeDialog(String distance, String duration) {
-        LinearLayout dialog = new LinearLayout(this);
-        dialog.setOrientation(LinearLayout.VERTICAL);
-        dialog.setBackground(ContextCompat.getDrawable(this, R.drawable.rounded_background)); // Fondo redondeado
-        dialog.setPadding(32, 32, 32, 32);
+        if (distanceTimeDialog == null) {
+            // Crear el diálogo solo si no existe
+            distanceTimeDialog = new LinearLayout(this);
+            distanceTimeDialog.setOrientation(LinearLayout.VERTICAL);
+            distanceTimeDialog.setBackground(ContextCompat.getDrawable(this, R.drawable.rounded_background)); // Fondo redondeado
+            distanceTimeDialog.setPadding(32, 32, 32, 32);
 
-        TextView distanceText = new TextView(this);
+            TextView distanceText = new TextView(this);
+            distanceText.setId(View.generateViewId()); // Generar ID único
+            distanceText.setTextSize(16);
+            distanceText.setTextColor(Color.WHITE); // Texto blanco
+            distanceTimeDialog.addView(distanceText);
+
+            TextView durationText = new TextView(this);
+            durationText.setId(View.generateViewId()); // Generar ID único
+            durationText.setTextSize(16);
+            durationText.setTextColor(Color.WHITE); // Texto blanco
+            distanceTimeDialog.addView(durationText);
+
+            // Configurar las propiedades de diseño
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT
+            );
+            params.gravity = Gravity.BOTTOM | Gravity.END;
+            params.setMargins(32, 32, 32, 32);
+
+            // Añadir el diálogo al contenedor raíz
+            FrameLayout rootLayout = findViewById(android.R.id.content);
+            rootLayout.addView(distanceTimeDialog, params);
+        }
+
+        // Actualizar el contenido del diálogo
+        TextView distanceText = (TextView) distanceTimeDialog.getChildAt(0);
+        TextView durationText = (TextView) distanceTimeDialog.getChildAt(1);
         distanceText.setText("Distancia: " + distance);
-        distanceText.setTextSize(16);
-        distanceText.setTextColor(Color.WHITE); // Texto blanco
-
-        TextView durationText = new TextView(this);
         durationText.setText("Duración: " + duration);
-        durationText.setTextSize(16);
-        durationText.setTextColor(Color.WHITE); // Texto blanco
 
-        dialog.addView(distanceText);
-        dialog.addView(durationText);
-
-        // Configurar las propiedades de diseño
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT
-        );
-        params.gravity = Gravity.BOTTOM | Gravity.END;
-        params.setMargins(32, 32, 32, 32);
-
-        // Añadir el diálogo al contenedor raíz
-        FrameLayout rootLayout = findViewById(android.R.id.content);
-        rootLayout.addView(dialog, params);
+        // Hacer visible el botón near_me_button
+        FloatingActionButton nearMeButton = findViewById(R.id.near_me_button);
+        nearMeButton.setVisibility(View.VISIBLE);
     }
 
     private void loadBusRoute(LatLng userLocation, LatLng destination) {
@@ -662,6 +681,133 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
             }
         }
     }
+
+    private void showStartGameDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Confirmar inicio")
+                .setMessage("¿Estás seguro de que quieres iniciar el modo juego?")
+                .setPositiveButton("Sí", (dialog, which) -> startGame())
+                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    //esto subirlo arriba con lo demas
+    private boolean isGameActive = false;
+    private long startTime;
+    private final LatLng UPV_LOCATION = new LatLng(42.8394805013312, -2.670361262280153); // Coordenadas de la UPV/EHU
+
+    private android.location.Location startLocation; // Variable de instancia para almacenar la ubicación inicial
+
+    private void startGame() {
+        if (isGameActive) {
+            Toast.makeText(this, "El juego ya está en curso.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        isGameActive = true;
+        startTime = System.currentTimeMillis();
+        Toast.makeText(this, "¡El juego ha comenzado! Llega a la UPV/EHU lo más rápido posible.", Toast.LENGTH_SHORT).show();
+
+        // Bloquear interacciones
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        transportButton.setEnabled(false);
+        layersButton.setEnabled(false);
+        nearMeButton.setEnabled(false);
+
+        // Desactivar el botón del menú
+        FloatingActionButton menuButton = findViewById(R.id.menu_button);
+        menuButton.setEnabled(false);
+
+        // Inicia la verificación periódica de la ubicación
+        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+            if (location != null) {
+                startLocation = location; // Guardar la ubicación inicial
+                checkUserProximity(location);
+            } else {
+            Toast.makeText(this, "No se pudo obtener la ubicación inicial.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void checkUserProximity(android.location.Location location) {
+        LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+        double distanceToUPV = calculateDistance(userLocation, UPV_LOCATION);
+
+        if (distanceToUPV <= 0.05) { // Si está a menos de 50 metros
+            endGame();
+        } else {
+            // Continúa verificando la ubicación
+            FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+            fusedLocationClient.getLastLocation().addOnSuccessListener(this::checkUserProximity);
+        }
+    }
+
+    private void endGame() {
+        if (startLocation == null) {
+            Log.e("MapActivity", "Error: La ubicación inicial no está disponible.");
+            Toast.makeText(this, "Error: No se pudo calcular la distancia.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        isGameActive = false;
+        long endTime = System.currentTimeMillis();
+        long elapsedTime = endTime - startTime; // Tiempo en milisegundos
+
+        // Calcular la distancia desde la ubicación inicial hasta la UPV/EHU
+        double distanceToUPV = calculateDistance(
+                new LatLng(startLocation.getLatitude(), startLocation.getLongitude()),
+                UPV_LOCATION
+        );
+
+        // Puntuación basada en tiempo y distancia
+        int basePoints = 1000; // Puntos base
+        int timePenalty = (int) (elapsedTime / 1000); // Penalización por tiempo (1 punto por segundo)
+        int distancePenalty = (int) ((100 - distanceToUPV) * 10); // Penalización por distancia (10 puntos por metro)
+
+        int points = Math.max(basePoints - timePenalty - distancePenalty, 0); // Asegurar que no sea negativo
+        Toast.makeText(this, "¡Has llegado a la UPV/EHU! Puntos obtenidos: " + points, Toast.LENGTH_LONG).show();
+
+        // Rehabilitar interacciones
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        transportButton.setEnabled(true);
+        layersButton.setEnabled(true);
+        nearMeButton.setEnabled(true);
+
+        // Reactivar el botón del menú
+        FloatingActionButton menuButton = findViewById(R.id.menu_button);
+        menuButton.setEnabled(true);
+
+        // Enviar puntos a la base de datos
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        int userId = prefs.getInt("id", -1); // Cambiado a "id" y valor por defecto -1
+        if (userId != -1) {
+            sendPointsToDatabase(String.valueOf(userId), points);
+        } else {
+            Log.e("MapActivity", "Error: ID de usuario no encontrado en SharedPreferences.");
+        }
+    }
+
+    private void sendPointsToDatabase(String userId, int points) {
+        new Thread(() -> {
+            try {
+                String url = "http://ec2-51-44-167-78.eu-west-3.compute.amazonaws.com/lbilbao040/WEB/GazteMap/puntos.php?id="
+                        + userId + "&puntos=" + points;
+                OkHttpClient client = new OkHttpClient();
+                Request request = new Request.Builder().url(url).build();
+                Response response = client.newCall(request).execute();
+
+                if (response.isSuccessful()) {
+                    Log.d("MapActivity", "Puntos enviados correctamente: " + points);
+                } else {
+                    Log.e("MapActivity", "Error al enviar los puntos: " + response.message());
+                }
+            } catch (Exception e) {
+                Log.e("MapActivity", "Error al enviar los puntos a la base de datos", e);
+            }
+        }).start();
+    }
+
 
     /* //mirar build.gradle para detalles
     public GtfsRealtime.FeedMessage downloadFeed(String url) throws IOException {
