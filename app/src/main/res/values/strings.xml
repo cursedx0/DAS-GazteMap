@@ -119,4 +119,7 @@
     <string name="traduccion">Traducir</string>
     <string name="traduciendo">Traduciendo...</string>
     <string name="ver_original">Ver original</string>
+    <string name="likes"> me gusta</string>
+    <string name="comentarios">comentarios</string>
+
 </resources>

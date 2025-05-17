@@ -94,4 +94,19 @@
     <string name="opciones_bici">Txirrindu aukera</string>
     <string name="lamigos">Leaderboard lagunak 🫂</string>
     <string name="lGlobal">Leaderboard mundua 🌎</string>
+    <string name="likes"> gustuko</string>
+    <string name="stock_nom">Hautatu akzio bat</string>
+    <string name="iniciar_sesion">Hasi saioa</string>
+    <string name="password">Pasahitza</string>
+    <string name="a">Eskerrik asko deskargatzeagatik!</string>
+    <string name="foto_usuario">Hautatu profil argazkia</string>
+    <string name="email_ya_registrado">Posta elektronikoa erregistratuta dago</string>
+    <string name="nombre">Izen osoa</string>
+    <string name="confirmar_password">Berretsi pasahitza</string>
+    <string name="completar_registro">Erregistroa osatu</string>
+    <string name="traduccion">Itzuli</string>
+    <string name="traduciendo">Itzultzen…</string>
+    <string name="ver_original">Ikusi jatorrizkoa</string>
+    <string name="comentarios">iruzkin</string>
+
 </resources>

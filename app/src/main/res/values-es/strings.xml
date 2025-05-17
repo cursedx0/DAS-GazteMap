@@ -79,8 +79,8 @@
     <string name="leaderboard">Compite con otros usuarios y gana puntos</string>
     <string name="points_cantidad">%d puntos</string>
     <string name="points_placeholder">0 puntos</string>
-    <string name="rank">Tu posición: @%d</string>
-    <string name="rank_placeholder">Tu posición: @0</string>
+    <string name="rank">Tu posición: #%d</string>
+    <string name="rank_placeholder">Tu posición: #0</string>
     <string name="historico">Total</string>
     <string name="mensual">Mensual</string>
     <string name="semanal">Semanal</string>
@@ -94,4 +94,21 @@
     <string name="opciones_bici">Opción bicicleta</string>
     <string name="lamigos">Leaderboard Amigos 🫂</string>
     <string name="lGlobal">Leaderboard Global 🌎</string>
+    <string name="likes"> me gusta</string>
+    <string name="stock_nom">Seleccione una acción</string>
+    <string name="iniciar_sesion">Iniciar Sesión</string>
+    <string name="password">Contraseña</string>
+    <string name="a">¡Gracias por descargar!</string>
+    <string name="foto_usuario">Seleccionar foto de perfil</string>
+    <string name="email_ya_registrado">Este correo ya está registrado</string>
+    <string name="nombre">Nombre completo</string>
+    <string name="confirmar_password">Confirmar contraseña</string>
+    <string name="completar_registro">Completar registro</string>
+    <string name="traduccion">Traducir</string>
+    <string name="traduciendo">Traduciendo…</string>
+    <string name="ver_original">Ver original</string>
+    <string name="comentarios">comentarios</string>
+
+
+
 </resources>
