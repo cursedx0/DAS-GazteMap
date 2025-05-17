@@ -221,7 +221,6 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
                 Toast.makeText(this, "El layer no está disponible.", Toast.LENGTH_SHORT).show();
             }
         });
-
         nearMeButton = findViewById(R.id.near_me_button);
         nearMeButton.setOnClickListener(view -> showStartGameDialog());
     }
@@ -233,14 +232,17 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
             case "walking":
                 transportButton.setImageResource(R.drawable.steps_40px);
                 nearMeButton.setVisibility(View.VISIBLE); // Mostrar el botón
+                layersButton.setVisibility(View.GONE); // Ocultar el botón de capas
                 break;
             case "bus":
                 transportButton.setImageResource(R.drawable.directions_bus_40px);
                 nearMeButton.setVisibility(View.GONE); // Ocultar el botón
+                layersButton.setVisibility(View.VISIBLE); // Mostrar el botón de capas
                 break;
             case "bicycle":
                 transportButton.setImageResource(R.drawable.pedal_bike_40px);
                 nearMeButton.setVisibility(View.VISIBLE); // Mostrar el botón
+                layersButton.setVisibility(View.VISIBLE); // Mostrar el botón de capas
                 break;
         }
     }
@@ -261,6 +263,21 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
                 mMap.clear();
                 mMap.addMarker(new MarkerOptions().position(userLocation).title("Tu ubicación"));
                 mMap.addMarker(new MarkerOptions().position(destination).title("Destino"));
+
+                // Actualizar la ubicación del usuario en la base de datos
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+                int userId = prefs.getInt("id", -1);
+                if (userId != -1) {
+                    updateUserLocation(userId, location.getLatitude(), location.getLongitude());
+                } else {
+                    Log.e("MapActivity", "Error: ID de usuario no encontrado en SharedPreferences.");
+                }
+                // Cargar ubicaciones de amigos
+                if (userId != -1) {
+                    loadFriendsLocations(userId);
+                } else {
+                    Log.e("MapActivity", "Error: No tienes amigos con la ubicación activada.");
+                }
 
                 // Dependiendo del modo de transporte, cargar rutas diferentes
                 switch (selectedTransportMode) {
@@ -810,21 +827,6 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
                     LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
                     mMap.addMarker(new MarkerOptions().position(userLocation).title("Tu ubicación"));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
-
-                    // Actualizar la ubicación del usuario en la base de datos
-                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-                    int userId = prefs.getInt("id", -1);
-                    if (userId != -1) {
-                        updateUserLocation(userId, location.getLatitude(), location.getLongitude());
-                    } else {
-                        Log.e("MapActivity", "Error: ID de usuario no encontrado en SharedPreferences.");
-                    }
-                    // Cargar ubicaciones de amigos
-                    if (userId != -1) {
-                        loadFriendsLocations(userId);
-                    } else {
-                        Log.e("MapActivity", "Error: No tienes amigos con la ubicación activada.");
-                    }
 
                     // Calcular ruta inicial con el modo de transporte predeterminado
                     recalculateRoute();
