@@ -93,10 +93,11 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
 
     private FloatingActionButton transportButton;
     private FloatingActionButton layersButton;
-
     private FloatingActionButton nearMeButton;
 
     private LinearLayout distanceTimeDialog;
+    private GeoJsonLayer bicycleLayer; // Variable para almacenar el layer
+
 
     private LinearLayout transportOptions;
     private LinearLayout optionWalking, optionBus, optionBicycle;
@@ -196,13 +197,34 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
             mapFragment.getMapAsync(this);
         }
 
+        // Controlar la visibilidad del layer con el botón de capas
         layersButton = findViewById(R.id.layers_button);
         layersButton.setOnClickListener(view -> {
-            Toast.makeText(MapActivity.this, "Botón de capas presionado", Toast.LENGTH_SHORT).show();
+            if (bicycleLayer != null) {
+                try {
+                    if (bicycleLayer.getFeatures().iterator().hasNext()) { // Verifica si tiene datos
+                        if (bicycleLayer.getMap() == null) {
+                            bicycleLayer.setMap(mMap); // Mostrar el layer
+                        } else {
+                            bicycleLayer.setMap(null); // Ocultar el layer
+                        }
+                    } else {
+                        Log.e("MapActivity", "El layer no contiene datos.");
+                        Toast.makeText(this, "El layer no contiene datos.", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e) {
+                    Log.e("MapActivity", "Error al alternar la visibilidad del layer", e);
+                    Toast.makeText(this, "Error al alternar la visibilidad del layer.", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Log.e("MapActivity", "El layer no está inicializado.");
+                Toast.makeText(this, "El layer no está disponible.", Toast.LENGTH_SHORT).show();
+            }
         });
 
         nearMeButton = findViewById(R.id.near_me_button);
-        nearMeButton.setOnClickListener(view -> showStartGameDialog());    }
+        nearMeButton.setOnClickListener(view -> showStartGameDialog());
+    }
 
     private void updateTransportIcon() {
         FloatingActionButton nearMeButton = findViewById(R.id.near_me_button);
@@ -272,6 +294,16 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
                 JSONObject geoJsonData = new JSONObject(geoJsonString);
                 GeoJsonLayer layer = new GeoJsonLayer(mMap, geoJsonData);
 
+                // Configurar estilo predeterminado para las líneas
+                GeoJsonLineStringStyle lineStyle = new GeoJsonLineStringStyle();
+                lineStyle.setColor(Color.RED); // Color predeterminado
+                lineStyle.setWidth(10); // Ancho de línea
+                for (GeoJsonFeature feature : layer.getFeatures()) {
+                    if (feature.getGeometry() instanceof GeoJsonLineString) {
+                        feature.setLineStringStyle(lineStyle);
+                    }
+                }
+
                 Graph graph = new Graph();
                 for (GeoJsonFeature feature : layer.getFeatures()) {
                     if (feature.getGeometry() != null && feature.getGeometry().getGeometryType().equals("LineString")) {
@@ -304,6 +336,7 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
                 String durationText = totalMinutes + " min";
 
                 runOnUiThread(() -> {
+                    bicycleLayer = layer; // Guardar el layer para controlarlo
                     for (GeoJsonFeature feature : layer.getFeatures()) {
                         if (feature.getGeometry() != null && feature.getGeometry().getGeometryType().equals("LineString")) {
                             List<LatLng> points = ((GeoJsonLineString) feature.getGeometry()).getCoordinates();
@@ -329,10 +362,15 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
                                         .width(10)
                                         .color(isPartOfShortestPath ? Color.GREEN : Color.RED);
 
-                                mMap.addPolyline(segmentPolyline);
+                                if (isPartOfShortestPath) {
+                                    mMap.addPolyline(segmentPolyline); // Dibujar solo las líneas verdes
+                                }
                             }
                         }
                     }
+
+                    // Ocultar el layer inicialmente
+                    bicycleLayer.setMap(null);
 
                     // Mostrar diálogo con distancia y tiempo
                     showDistanceTimeDialog(distanceText, durationText);
@@ -343,6 +381,7 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
             }
         }).start();
     }
+
 
     private void loadWalkingRoute(LatLng userLocation, LatLng destination) {
         new Thread(() -> {
