@@ -41,6 +41,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -663,6 +665,77 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
         }).start();
     }
 
+    private void loadFriendsLocations(int userId) {
+        new Thread(() -> {
+            try {
+                // URL del endpoint
+                String url = "http://ec2-51-44-167-78.eu-west-3.compute.amazonaws.com/lbilbao040/WEB/GazteMap/api.php";
+
+                // Crear el JSON con los datos
+                JSONObject jsonBody = new JSONObject();
+                jsonBody.put("accion", "ubicacion_amigos");
+                jsonBody.put("user_id", userId);
+
+                // Configurar la solicitud POST
+                OkHttpClient client = new OkHttpClient();
+                RequestBody body = RequestBody.create(
+                        jsonBody.toString(),
+                        okhttp3.MediaType.parse("application/json; charset=utf-8")
+                );
+                Request request = new Request.Builder()
+                        .url(url)
+                        .post(body)
+                        .build();
+
+                // Ejecutar la solicitud
+                Response response = client.newCall(request).execute();
+
+                if (response.isSuccessful()) {
+                    String responseData = response.body().string();
+                    JSONObject jsonResponse = new JSONObject(responseData);
+
+                    if ("success".equals(jsonResponse.getString("status"))) {
+                        JSONArray friendsArray = jsonResponse.getJSONArray("amigos");
+
+                        // Añadir marcadores en el mapa para cada amigo
+                        runOnUiThread(() -> {
+                            for (int i = 0; i < friendsArray.length(); i++) {
+                                try {
+                                    JSONObject friend = friendsArray.getJSONObject(i);
+
+                                    // Verificar si lat y lon no son null
+                                    if (!friend.isNull("lat") && !friend.isNull("lon")) {
+                                        String name = friend.getString("nombre");
+                                        double lat = friend.getDouble("lat");
+                                        double lon = friend.getDouble("lon");
+
+                                        LatLng friendLocation = new LatLng(lat, lon);
+                                        Log.d("MapActivity", "Añadiendo marcador para amigo: " + name + " en lat: " + lat + ", lon: " + lon);
+                                        mMap.addMarker(new MarkerOptions()
+                                                .position(friendLocation)
+                                                .title(name)
+                                                .snippet("Amigo")
+                                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                                    } else {
+                                        Log.e("MapActivity", "Amigo con ubicación inválida: " + friend.toString());
+                                    }
+                                } catch (Exception e) {
+                                    Log.e("MapActivity", "Error al procesar la ubicación de un amigo", e);
+                                }
+                            }
+                        });
+                    } else {
+                        Log.e("MapActivity", "Error en la respuesta: " + jsonResponse.getString("status"));
+                    }
+                } else {
+                    Log.e("MapActivity", "Error al obtener ubicaciones de amigos: " + response.message());
+                }
+            } catch (Exception e) {
+                Log.e("MapActivity", "Error al cargar ubicaciones de amigos", e);
+            }
+        }).start();
+    }
+
     private void saveBitmapToCache(Bitmap bitmap) {
         try {
             File cacheDir = getCacheDir();
@@ -704,6 +777,12 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
                         updateUserLocation(userId, location.getLatitude(), location.getLongitude());
                     } else {
                         Log.e("MapActivity", "Error: ID de usuario no encontrado en SharedPreferences.");
+                    }
+                    // Cargar ubicaciones de amigos
+                    if (userId != -1) {
+                        loadFriendsLocations(userId);
+                    } else {
+                        Log.e("MapActivity", "Error: No tienes amigos con la ubicación activada.");
                     }
 
                     // Calcular ruta inicial con el modo de transporte predeterminado
