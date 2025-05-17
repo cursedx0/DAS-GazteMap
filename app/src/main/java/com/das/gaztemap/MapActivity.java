@@ -205,15 +205,20 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
         nearMeButton.setOnClickListener(view -> showStartGameDialog());    }
 
     private void updateTransportIcon() {
+        FloatingActionButton nearMeButton = findViewById(R.id.near_me_button);
+
         switch (selectedTransportMode) {
             case "walking":
                 transportButton.setImageResource(R.drawable.steps_40px);
+                nearMeButton.setVisibility(View.VISIBLE); // Mostrar el botón
                 break;
             case "bus":
                 transportButton.setImageResource(R.drawable.directions_bus_40px);
+                nearMeButton.setVisibility(View.GONE); // Ocultar el botón
                 break;
             case "bicycle":
                 transportButton.setImageResource(R.drawable.pedal_bike_40px);
+                nearMeButton.setVisibility(View.VISIBLE); // Mostrar el botón
                 break;
         }
     }
@@ -466,9 +471,6 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
         distanceText.setText("Distancia: " + distance);
         durationText.setText("Duración: " + duration);
 
-        // Hacer visible el botón near_me_button
-        FloatingActionButton nearMeButton = findViewById(R.id.near_me_button);
-        nearMeButton.setVisibility(View.VISIBLE);
     }
 
     private void loadBusRoute(LatLng userLocation, LatLng destination) {
