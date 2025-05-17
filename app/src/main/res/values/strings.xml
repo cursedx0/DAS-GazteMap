@@ -105,4 +105,14 @@
     <string name="sinSoli">No tienes solicitudes todavía.</string>
     <string name="lamigos">Leaderboard Amigos 🫂</string>
     <string name="lGlobal">Leaderboard Global 🌎</string>
+    <string name="stock_nom">Seleccione una acción</string>
+    <string name="iniciar_sesion">Iniciar Sesión</string>
+    <string name="password">Contraseña</string>
+    <string name="a">"¡Gracias por descargar!"</string>
+    <string name="foto_usuario">Seleccionar foto de perfil</string>
+    <string name="email_ya_registrado">Este correo ya está registrado</string>
+    <string name="nombre">Nombre completo</string>
+    <string name="confirmar_password">Confirmar contraseña</string>
+    <string name="completar_registro">Completar registro</string>
+
 </resources>
