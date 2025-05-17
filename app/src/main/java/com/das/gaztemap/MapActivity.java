@@ -420,18 +420,18 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
     private void showDistanceTimeDialog(String distance, String duration) {
         LinearLayout dialog = new LinearLayout(this);
         dialog.setOrientation(LinearLayout.VERTICAL);
-        dialog.setBackgroundResource(R.drawable.dialog_redonde);
+        dialog.setBackground(ContextCompat.getDrawable(this, R.drawable.rounded_background)); // Fondo redondeado
         dialog.setPadding(32, 32, 32, 32);
 
         TextView distanceText = new TextView(this);
         distanceText.setText("Distancia: " + distance);
         distanceText.setTextSize(16);
-        distanceText.setTextColor(Color.BLACK);
+        distanceText.setTextColor(Color.WHITE); // Texto blanco
 
         TextView durationText = new TextView(this);
         durationText.setText("Duración: " + duration);
         durationText.setTextSize(16);
-        durationText.setTextColor(Color.BLACK);
+        durationText.setTextColor(Color.WHITE); // Texto blanco
 
         dialog.addView(distanceText);
         dialog.addView(durationText);
