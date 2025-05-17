@@ -2,77 +2,78 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#DD4199E4">
 
-    <LinearLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewComments"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:paddingTop="8dp"
+        android:paddingBottom="72dp"
+    android:clipToPadding="false"
+    android:scrollbars="vertical"
+    tools:listitem="@layout/item_comentario"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewComments"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/inputLayoutComment"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="329dp"
+            android:layout_height="69dp"
             android:layout_weight="1"
-            android:padding="8dp"/>
+            app:boxBackgroundColor="@color/white"
+            app:boxBackgroundMode="outline"
+            app:boxStrokeColor="@color/gris_azulado_700"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/Circulo">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="8dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextComment"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:hint="Escribe un comentario..."
+                android:inputType="textMultiLine"
+                android:maxLines="3" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/inputLayoutComment"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:counterMaxLength="500"
-                app:hintEnabled="false"
-                app:boxBackgroundMode="outline"
-                app:boxBackgroundColor="@color/white"
-                app:boxStrokeColor="@color/gris_azulado_700"
-                app:boxStrokeWidth="1dp"
-                app:boxStrokeWidthFocused="2dp"
-                app:shapeAppearanceOverlay="@style/Ciculo"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editTextComment"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Escribe un comentario..."
-                    android:inputType="textMultiLine"
-                    android:maxLines="3"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/fabSendComment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:src="@drawable/send"
-                app:backgroundTint="@color/azul_600"
-                app:tint="@color/white"
-                app:elevation="0dp"
-                android:elevation="0dp"/>
-
-        </LinearLayout>
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabSubscribe"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:src="@drawable/notifications"
-        app:backgroundTint="@color/negro"
+        app:layout_anchor="@id/recyclerViewComments"
+        app:layout_anchorGravity="top|end"
+        app:backgroundTint="@color/black"
         app:tint="@color/white"
         app:borderWidth="1dp"
-        app:fabSize="normal"
-        app:layout_anchor="@id/recyclerViewComments"
-        app:layout_anchorGravity="top|end"/>
+        app:elevation="8dp"
+        android:src="@drawable/notifications"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabSendComment"
+        android:layout_width="wrap_content"
+        android:layout_height="75dp"
+        android:elevation="0dp"
+        android:src="@drawable/send"
+        app:backgroundTint="@color/azul_600"
+        app:elevation="0dp"
+        app:fabSize="auto"
+        app:layout_anchor="@+id/constraintLayout"
+        app:layout_anchorGravity="end|center"
+        app:tint="@color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

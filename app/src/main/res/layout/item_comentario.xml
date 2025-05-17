@@ -28,10 +28,9 @@
                 android:id="@+id/imageViewProfile"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:contentDescription="string/foto_perfil"
                 android:scaleType="centerCrop"
                 android:src="@drawable/placeholder"
-                app:shapeAppearanceOverlay="@style/Ciculo" />
+                app:shapeAppearanceOverlay="@style/Circulo" />
 
             <TextView
                 android:id="@+id/textViewUserName"
@@ -74,7 +73,7 @@
                 android:minHeight="24dp"
                 android:paddingVertical="4dp"
                 android:paddingHorizontal="8dp"
-                android:text="string/traduccion"
+                android:text="@string/traduccion"
                 android:textColor="?attr/colorPrimary"
                 android:textSize="12sp"
                 app:icon="@drawable/translate"
