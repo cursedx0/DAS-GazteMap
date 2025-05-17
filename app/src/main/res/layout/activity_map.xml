@@ -81,7 +81,6 @@
             app:borderWidth="0dp"
             app:elevation="6dp"
             app:fabSize="normal"
-            app:layout_constraintBottom_toTopOf="@+id/distanceTimeDialog"
             app:layout_constraintEnd_toEndOf="parent"
             app:tint="@android:color/white"
             android:visibility="gone" />
