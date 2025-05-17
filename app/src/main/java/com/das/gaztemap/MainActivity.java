@@ -3,23 +3,26 @@ package com.das.gaztemap;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.core.graphics.Insets;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -33,11 +36,20 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.FirebaseApp;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
 public class MainActivity extends BaseActivity {
     private Dialog loginDialog;
     private Dialog registerDialog;
     private SharedPreferences prefs;
     private SharedPreferences.Editor editor;
+    private String encodedImage = "";
+    private ImageView previewImage;
+
+    private ActivityResultLauncher<String> pickImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,9 +69,10 @@ public class MainActivity extends BaseActivity {
 
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
-
             return insets;
         });
+
+        registerImagePicker();
 
         prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         editor = prefs.edit();
@@ -67,6 +80,58 @@ public class MainActivity extends BaseActivity {
         setupWelcomeScreen();
         initializeDialogs();
         checkUserLoggedIn();
+    }
+
+    private void registerImagePicker() {
+        pickImage = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                uri -> {
+                    if (uri != null) {
+                        try {
+                            previewImage.setImageURI(uri);
+
+                            encodedImage = encodeImageToBase64(uri);
+                        } catch (Exception e) {
+                            Log.e("ImagePicker", "Error al procesar la imagen", e);
+                            Toast.makeText(this, "Error al procesar la imagen", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    private String encodeImageToBase64(Uri imageUri) {
+        try {
+            InputStream inputStream = getContentResolver().openInputStream(imageUri);
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+            Bitmap resizedBitmap = resizeBitmap(bitmap, 500); // 500px máximo
+
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream);
+            byte[] byteArray = byteArrayOutputStream.toByteArray();
+
+            return Base64.encodeToString(byteArray, Base64.DEFAULT);
+        } catch (FileNotFoundException e) {
+            Log.e("ImageEncoder", "Archivo no encontrado", e);
+            return "";
+        }
+    }
+
+    private Bitmap resizeBitmap(Bitmap bitmap, int maxSize) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+
+        float ratio = (float) width / (float) height;
+
+        if (ratio > 1) {
+            width = maxSize;
+            height = (int) (width / ratio);
+        } else {
+            height = maxSize;
+            width = (int) (height * ratio);
+        }
+
+        return Bitmap.createScaledBitmap(bitmap, width, height, true);
     }
 
     private void setupWelcomeScreen() {
@@ -141,9 +206,10 @@ public class MainActivity extends BaseActivity {
         TextInputEditText etConfirmarPassword = registerDialog.findViewById(R.id.etConfirmarPassword);
         MaterialButton btnCompletarRegistro = registerDialog.findViewById(R.id.btnCompletarRegistro);
         Button botonSeleccionarFoto = registerDialog.findViewById(R.id.botonSeleccionarFoto);
+        previewImage = registerDialog.findViewById(R.id.fotoPerfilreg);
 
         botonSeleccionarFoto.setOnClickListener(v -> {
-            Toast.makeText(MainActivity.this, "Seleccionar foto funcionalidad", Toast.LENGTH_SHORT).show();
+            pickImage.launch("image/*");
         });
 
         btnCompletarRegistro.setOnClickListener(v -> {
@@ -157,18 +223,85 @@ public class MainActivity extends BaseActivity {
                 return;
             }
 
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(getApplicationContext(), "Correo electrónico no válido", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (password.length() < 4) {
+                Toast.makeText(getApplicationContext(), "La contraseña debe tener al menos 4 caracteres", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             if (!password.equals(confirmPassword)) {
                 Toast.makeText(getApplicationContext(), "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // HACER
-
-            Toast.makeText(getApplicationContext(), "Registro completado con éxito", Toast.LENGTH_SHORT).show();
-            registerDialog.dismiss();
-
-            performLogin(email, password, true);
+            performRegistration(nombre, email, password);
         });
+    }
+
+    private void performRegistration(String nombre, String email, String password) {
+        Data.Builder dataBuilder = new Data.Builder()
+                .putString("accion", "insertar")
+                .putString("usuario", nombre)
+                .putString("email", email)
+                .putString("pw", password);
+
+        Data datos = dataBuilder.build();
+
+        OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(BDConnector.class)
+                .setInputData(datos)
+                .build();
+
+        WorkManager.getInstance(MainActivity.this).enqueue(request);
+
+        WorkManager.getInstance(getApplicationContext())
+                .getWorkInfoByIdLiveData(request.getId())
+                .observe(MainActivity.this, workInfo -> {
+                    if (workInfo != null && workInfo.getState().isFinished()) {
+                        if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                            String code = workInfo.getOutputData().getString("code");
+                            if (code.equals("0")) {
+                                Toast.makeText(getApplicationContext(), "Registro completado", Toast.LENGTH_SHORT).show();
+
+                                if (!encodedImage.isEmpty()) {
+                                    uploadProfileImage(nombre);
+                                }
+
+                                registerDialog.dismiss();
+                                performLogin(email, password, true);
+                            }
+                        }
+                    }
+                });
+    }
+
+    private void uploadProfileImage(String nombreUsuario) {
+        Data imageData = new Data.Builder()
+                .putString("accion", "setpfp")
+                .putString("nombre", nombreUsuario)
+                .putString("pic", encodedImage)
+                .build();
+
+        OneTimeWorkRequest uploadRequest = new OneTimeWorkRequest.Builder(BDConnector.class)
+                .setInputData(imageData)
+                .build();
+
+        WorkManager.getInstance(this).enqueue(uploadRequest);
+
+        WorkManager.getInstance(getApplicationContext())
+                .getWorkInfoByIdLiveData(uploadRequest.getId())
+                .observe(this, workInfo -> {
+                    if (workInfo != null && workInfo.getState().isFinished()) {
+                        if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                            Log.d("UPLOAD", "Imagen subida exitosamente");
+                        } else {
+                            Log.e("UPLOAD", "Error al subir la imagen");
+                        }
+                    }
+                });
     }
 
     private void checkUserLoggedIn() {
@@ -197,6 +330,8 @@ public class MainActivity extends BaseActivity {
         etEmail.setText("");
         etPassword.setText("");
         etConfirmarPassword.setText("");
+        previewImage.setImageResource(R.drawable.person2);
+        encodedImage = "";
 
         registerDialog.show();
     }
