@@ -1,6 +1,7 @@
 package com.das.gaztemap;
 
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -48,6 +49,8 @@ public class MainActivity extends BaseActivity {
     private SharedPreferences.Editor editor;
     private String encodedImage = "";
     private ImageView previewImage;
+    private ActivityResultLauncher<Intent> takePicture;
+
 
     private ActivityResultLauncher<String> pickImage;
 
@@ -80,8 +83,28 @@ public class MainActivity extends BaseActivity {
         setupWelcomeScreen();
         initializeDialogs();
         checkUserLoggedIn();
-    }
+        registerCamera();
 
+    }
+    private void registerCamera() {
+        takePicture = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Bundle extras = result.getData().getExtras();
+                        Bitmap imageBitmap = (Bitmap) extras.get("data");
+                        previewImage.setImageBitmap(imageBitmap);
+                        encodedImage = bitmapToBase64(imageBitmap);
+                    }
+                });
+    }
+    private String bitmapToBase64(Bitmap bitmap) {
+        Bitmap resizedBitmap = resizeBitmap(bitmap, 500);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+    }
     private void registerImagePicker() {
         pickImage = registerForActivityResult(
                 new ActivityResultContracts.GetContent(),
@@ -205,11 +228,19 @@ public class MainActivity extends BaseActivity {
         TextInputEditText etPassword = registerDialog.findViewById(R.id.etPassword);
         TextInputEditText etConfirmarPassword = registerDialog.findViewById(R.id.etConfirmarPassword);
         MaterialButton btnCompletarRegistro = registerDialog.findViewById(R.id.btnCompletarRegistro);
-        Button botonSeleccionarFoto = registerDialog.findViewById(R.id.botonSeleccionarFoto);
         previewImage = registerDialog.findViewById(R.id.fotoPerfilreg);
+        MaterialButton btnCamera = registerDialog.findViewById(R.id.buttonCamReg);
+        MaterialButton btnGallery = registerDialog.findViewById(R.id.buttonGalleryReg);
 
-        botonSeleccionarFoto.setOnClickListener(v -> {
-            pickImage.launch("image/*");
+        btnGallery.setOnClickListener(v -> pickImage.launch("image/*"));
+
+        btnCamera.setOnClickListener(v -> {
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            try {
+                takePicture.launch(takePictureIntent);
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(this, "No se encontró una aplicación de cámara", Toast.LENGTH_SHORT).show();
+            }
         });
 
         btnCompletarRegistro.setOnClickListener(v -> {
