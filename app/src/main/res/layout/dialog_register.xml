@@ -28,7 +28,7 @@
             android:layout_height="100dp"
             android:src="@drawable/person2"
             android:layout_marginBottom="8dp"
-            app:shapeAppearanceOverlay="@style/Ciculo"
+            app:shapeAppearanceOverlay="@style/Circulo"
             android:scaleType="centerCrop"/>
         <LinearLayout
             android:layout_width="wrap_content"
