@@ -520,12 +520,17 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
             intent.putExtra("frag", "amigos");
         } else if (id == R.id.Foro) {
             intent = new Intent(LeaderboardActivity.this, ForumActivity.class);
+        } else if (id == R.id.Opciones){
+            intent = new Intent(LeaderboardActivity.this, AllActivity.class);
+            intent.putExtra("frag","opciones");
         }
 
         if (intent != null) {
+            actExtras();
             intent.putExtra("nombre", nombre);
             intent.putExtra("email", email);
-            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            //intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
         }
 
@@ -550,6 +555,12 @@ public class LeaderboardActivity extends BaseActivity implements NavigationView.
     protected void onResume() {
         super.onResume();
         navigationView.setCheckedItem(R.id.Top500);
+    }
+
+    private void actExtras(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(LeaderboardActivity.this);
+        nombre = prefs.getString("nombre","error");
+        email = prefs.getString("email","errormail");
     }
 
     @Override

@@ -60,12 +60,6 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
             return insets;
         });
 
-        //TODO INTENCIONES: ESTA ACTIVIDAD TENDRÁ UN HIDDENDRAWER (LA PESTAÑA QUE SALE DE LA IZQUIERDA CON LA FOTO DE PERFIL Y DETALLES DEL USUARIO) Y UN TOOLBAR, ASI COMO UN FRAGMENT CONTAINER QUE SE MODIFICARÁ DEPENDIENDO DE LA OPCIÓN ELEGIDA (PUEDE HABER EXCEPCIONES).
-        // esta metido dentro del mapa <(:)
-        //USUARIOS DE PRUEBA
-            //email: xxx, pw: xxx
-            //email: yyy, pw: yyy
-
         drawerLayout = findViewById(R.id.drawer_layout);
 
         // Configurar el perfil en el menú lateral
@@ -87,11 +81,6 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
             nombre = getIntent().getStringExtra("nombre");
             email = getIntent().getStringExtra("email");
             obtenerPfpNav();
-
-            // poner aqui datos sacados al hacer login
-
-
-            // imagen: imgPerfil.setImageResource(fotolukenserver);
         }
 
         //botones drawer
@@ -243,17 +232,7 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
             startActivity(intent);
         } else if (id == R.id.Amigos) {
             if (!Objects.equals(frag, "amigos")) { //solo cambia fragment si no está en amigos
-                AmigosFragment af = new AmigosFragment();
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                findViewById(R.id.fragmentContainer).setVisibility(View.VISIBLE);
-                transaction.replace(R.id.fragmentContainer, af);
-                //transaction.addToBackStack(null); //para poder regresar al fragmento anterior
-                transaction.commit();
-                navigationView.setCheckedItem(R.id.Amigos);
-                frag = "amigos";
-                buttonPersonas.setVisibility(View.VISIBLE);
-                buttonSolis.setVisibility(View.VISIBLE);
-                buttonAmigos.setVisibility(View.VISIBLE);
+                irAmigos();
             }else{ //sino simplemente cierra drawer
                 if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                     drawerLayout.closeDrawer(GravityCompat.START);
@@ -278,17 +257,7 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
         }
         else if (id == R.id.Opciones) {
             if (!Objects.equals(frag, "opciones")) { //solo cambia fragment si no está en amigos
-                Preferencias pref = new Preferencias();
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                findViewById(R.id.fragmentContainer).setVisibility(View.VISIBLE);
-                transaction.replace(R.id.fragmentContainer, pref);
-                //transaction.addToBackStack(null); //para poder regresar al fragmento anterior
-                transaction.commit();
-                navigationView.setCheckedItem(R.id.Opciones);
-                frag = "opciones";
-                buttonPersonas.setVisibility(View.INVISIBLE);
-                buttonSolis.setVisibility(View.INVISIBLE);
-                buttonAmigos.setVisibility(View.INVISIBLE);
+                irOpciones();
             }else{ //sino simplemente cierra drawer
                 if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                     drawerLayout.closeDrawer(GravityCompat.START);
@@ -322,6 +291,53 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
             email = prefs.getString("email","errormail");
         }
     }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent); // importante: actualiza el intent que devuelve getIntent()
+        manejarFragmentoDesdeIntent(intent);
+    }
+
+    private void irOpciones(){
+        Preferencias pref = new Preferencias();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        findViewById(R.id.fragmentContainer).setVisibility(View.VISIBLE);
+        transaction.replace(R.id.fragmentContainer, pref);
+        //transaction.addToBackStack(null); //para poder regresar al fragmento anterior
+        transaction.commit();
+        navigationView.setCheckedItem(R.id.Opciones);
+        frag = "opciones";
+        buttonPersonas.setVisibility(View.INVISIBLE);
+        buttonSolis.setVisibility(View.INVISIBLE);
+        buttonAmigos.setVisibility(View.INVISIBLE);
+    }
+
+    private void irAmigos(){
+        AmigosFragment af = new AmigosFragment();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        findViewById(R.id.fragmentContainer).setVisibility(View.VISIBLE);
+        transaction.replace(R.id.fragmentContainer, af);
+        //transaction.addToBackStack(null); //para poder regresar al fragmento anterior
+        transaction.commit();
+        navigationView.setCheckedItem(R.id.Amigos);
+        frag = "amigos";
+        buttonPersonas.setVisibility(View.VISIBLE);
+        buttonSolis.setVisibility(View.VISIBLE);
+        buttonAmigos.setVisibility(View.VISIBLE);
+    }
+
+    private void manejarFragmentoDesdeIntent(Intent intent) {
+        String frag = intent.getStringExtra("frag");
+        if (frag != null) {
+            if (frag.equals("amigos")) {
+                irAmigos();
+            } else if (frag.equals("opciones")) {
+                irOpciones();
+            }
+        }
+    }
+
 
     public void actualizarNavCheck(){
         if(Objects.equals(frag, "amigos")) {
