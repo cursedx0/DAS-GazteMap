@@ -117,7 +117,9 @@ public class Preferencias extends PreferenceFragmentCompat implements SharedPref
                 String newLanguage = sharedPreferences.getString(s, "ES");
                 if (getActivity() instanceof BaseActivity) {
                     ((BaseActivity) getActivity()).setLocale(newLanguage);
+                    requireActivity().recreate();
                 }
+                break;
             case "tema":
                 String newTheme = sharedPreferences.getString(s, "system");
                 Log.d("Preferencias", "Nuevo tema seleccionado: " + newTheme);
