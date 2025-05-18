@@ -32,7 +32,7 @@
             android:exported="false" />
         <receiver
             android:name="widget.LeaderboardAppWidget"
-            android:label="Mapa GazteMap"
+            android:label="Leaderboard"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
