@@ -9,6 +9,7 @@
     <color name="gris_azulado_700">#608192</color>
     <color name="negro">#000000</color>
     <color name="blanco">#FFFFFF</color>
+    <color name="comentarioesc">#FDFDFD</color>
 
     <color name="gris_claro_fondo">#F5F5F5</color>
     <color name="gris_medio">#757575</color>

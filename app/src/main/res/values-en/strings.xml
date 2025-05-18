@@ -23,8 +23,8 @@
     <string name="sistema">System</string>
     <string name="oscuro">Dark</string>
     <string name="claro">Bright</string>
-    <string name="idioma">Language</string>
-    <string name="tema">Theme</string>
+    <string name="idioma">🌐 Language</string>
+    <string name="tema">🎨 Theme</string>
     <string name="eligeIdioma">Choose a language</string>
     <string name="eligeTema">Choose a theme</string>
     <string name="errorEmail">Insert a valid email.</string>
@@ -59,7 +59,7 @@
     <string name="menu_button">Open menu</string>
     <string name="apartados">📌 Sections</string>
     <string name="apartado_mapa">🗺️ Map</string>
-    <string name="apartado_TOP500">🏆 Top 500 users</string>
+    <string name="apartado_TOP500">🏆 Top users</string>
     <string name="apartado_amigos">🤝 Friends</string>
     <string name="apartado_foro">💬 Forum</string>
     <string name="apartado_configuracion">⚙️ Options</string>

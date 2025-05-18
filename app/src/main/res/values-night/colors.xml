@@ -9,7 +9,7 @@
     <color name="gris_azulado_700">#37474F</color>
     <color name="negro">#000000</color>
     <color name="blanco">#FFFFFF</color>
-
+    <color name="comentarioesc">#353434</color>
     <color name="gris_claro_fondo">#121212</color>
     <color name="gris_medio">#9E9E9E</color>
 
@@ -26,6 +26,7 @@
     <color name="widget_texto_nombre">#E0E0E0</color>
     <color name="widget_texto_precio">#81C784</color>
     <color name="widget_texto_fecha">#90A4AE</color>
+    <color name="azuladito">#1E2F3E</color>
 
     <color name="mensaje_enviado_background">#0D47A1</color>
     <color name="mensaje_recibido_background">#2D2D2D</color>

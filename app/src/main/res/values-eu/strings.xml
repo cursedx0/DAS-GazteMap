@@ -23,8 +23,8 @@
     <string name="sistema">Sistema</string>
     <string name="oscuro">Iluna</string>
     <string name="claro">Argia</string>
-    <string name="idioma">Hizkuntza</string>
-    <string name="tema">Estilo</string>
+    <string name="idioma">🌐 Hizkuntza</string>
+    <string name="tema">🎨 Estilo</string>
     <string name="eligeIdioma">Hizkuntz bat aukeratu</string>
     <string name="eligeTema">Estilo bat aukeratu</string>
     <string name="errorEmail">Baliozko email bat idatzi.</string>
@@ -59,7 +59,7 @@
     <string name="menu_button">Menu ireki</string>
     <string name="apartados">📌 Atalak</string>
     <string name="apartado_mapa">🗺️ Mapa</string>
-    <string name="apartado_TOP500">🏆 Top 500 erabiltzaileak</string>
+    <string name="apartado_TOP500">🏆 Top erabiltzaileak</string>
     <string name="apartado_amigos">🤝 Lagunak</string>
     <string name="apartado_foro">💬 Foroa</string>
     <string name="apartado_configuracion">⚙️ Aukerak</string>
