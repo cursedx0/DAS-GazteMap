@@ -108,5 +108,6 @@
     <string name="traduciendo">Translating…</string>
     <string name="ver_original">View original</string>
     <string name="comentarios">comments</string>
+    <string name="buscarUsuariosPuntos">Look up users...</string>
 
 </resources>

@@ -35,9 +35,9 @@ public class Preferencias extends PreferenceFragmentCompat implements SharedPref
             case "idioma":
                 Log.i("BUENAS", "SOY YO");
                 String newLanguage = sharedPreferences.getString(s, "ES");
-
+                Log.i("BUENAS",newLanguage);
                 if (getActivity() instanceof BaseActivity) {
-                    ((BaseActivity) getActivity()).setLocale(newLanguage); // 🔹 Aplicar el nuevo idioma
+                    ((BaseActivity) getActivity()).setLocale(newLanguage);
                 }
                 break;
             case "tema":

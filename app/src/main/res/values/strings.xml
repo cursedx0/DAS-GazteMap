@@ -121,5 +121,6 @@
     <string name="ver_original">Ver original</string>
     <string name="likes"> me gusta</string>
     <string name="comentarios">comentarios</string>
+    <string name="buscarUsuariosPuntos">Buscar usuarios...</string>
 
 </resources>
