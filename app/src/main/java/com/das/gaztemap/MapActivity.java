@@ -1072,6 +1072,8 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
             }
             nombre = prefs.getString("nombre","error");
             email = prefs.getString("email","errormail");
+            setLocale(prefs.getString("idioma","error"));
+            setThemeMode(prefs.getString("tema","error"),true);
         }
     }
 

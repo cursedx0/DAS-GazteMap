@@ -70,9 +70,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                 DateUtils.MINUTE_IN_MILLIS
         );
         holder.textViewTimestamp.setText(timeAgo);
-
-        holder.textViewLikes.setText(String.valueOf(post.getLikeCount()) + " likes");
-        holder.textViewComments.setText(String.valueOf(post.getCommentCount()) + " comentarios");
+        holder.textViewLikes.setText(String.valueOf(post.getLikeCount()) +" "+ context.getString(R.string.likes));
+        holder.textViewComments.setText(String.valueOf(post.getCommentCount()) +" "+ context.getString(R.string.comentarios));
 
         boolean isMyPost = String.valueOf(currentUserId).equals(post.getUserId());
         holder.buttonMore.setVisibility(isMyPost ? View.VISIBLE : View.INVISIBLE);

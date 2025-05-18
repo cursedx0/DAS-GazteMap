@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:drawableLeft="@android:drawable/ic_menu_search"
-            android:hint="Buscar usuarios..."
+            android:hint="@string/buscarUsuariosPuntos"
             android:inputType="text"
             android:padding="12dp" />
 

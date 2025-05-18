@@ -115,4 +115,12 @@
     <string name="confirmar_password">Confirmar contraseña</string>
     <string name="completar_registro">Completar registro</string>
 
+
+    <string name="traduccion">Traducir</string>
+    <string name="traduciendo">Traduciendo...</string>
+    <string name="ver_original">Ver original</string>
+    <string name="likes"> me gusta</string>
+    <string name="comentarios">comentarios</string>
+    <string name="buscarUsuariosPuntos">Buscar usuarios...</string>
+
 </resources>

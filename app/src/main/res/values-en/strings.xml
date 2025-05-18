@@ -94,4 +94,20 @@
     <string name="opciones_bici">Bicycle option</string>
     <string name="lamigos">Friends leaderboard 🫂</string>
     <string name="lGlobal">Global leaderboard 🌎</string>
+    <string name="likes"> likes</string>
+    <string name="stock_nom">Select a stock</string>
+    <string name="iniciar_sesion">Log In</string>
+    <string name="password">Password</string>
+    <string name="a">Thank you for downloading!</string>
+    <string name="foto_usuario">Select profile picture</string>
+    <string name="email_ya_registrado">Email already registered</string>
+    <string name="nombre">Full name</string>
+    <string name="confirmar_password">Confirm password</string>
+    <string name="completar_registro">Complete registration</string>
+    <string name="traduccion">Translate</string>
+    <string name="traduciendo">Translating…</string>
+    <string name="ver_original">View original</string>
+    <string name="comentarios">comments</string>
+    <string name="buscarUsuariosPuntos">Look up users...</string>
+
 </resources>
