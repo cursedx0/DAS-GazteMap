@@ -97,7 +97,7 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
 
     private LinearLayout distanceTimeDialog;
     private GeoJsonLayer bicycleLayer; // Variable para almacenar el layer
-
+    private List<GeoJsonLayer> busRoutesLayers = new ArrayList<>();
 
     private LinearLayout transportOptions;
     private LinearLayout optionWalking, optionBus, optionBicycle;
@@ -534,9 +534,9 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
             try {
                 // Configurar OkHttpClient con tiempos de espera personalizados
                 OkHttpClient client = new OkHttpClient.Builder()
-                        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS) // Tiempo de espera para conectar
-                        .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)    // Tiempo de espera para leer
-                        .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)   // Tiempo de espera para escribir
+                        .connectTimeout(60, java.util.concurrent.TimeUnit.SECONDS) // Tiempo de espera para conectar
+                        .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)    // Tiempo de espera para leer
+                        .writeTimeout(60, java.util.concurrent.TimeUnit.SECONDS)   // Tiempo de espera para escribir
                         .build();
 
                 // Primera llamada: Obtener paradas cercanas al campus
