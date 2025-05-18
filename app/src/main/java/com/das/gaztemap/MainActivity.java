@@ -10,20 +10,19 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.util.Base64;
 import android.util.Log;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.content.FileProvider;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -37,21 +36,23 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.FirebaseApp;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends BaseActivity {
     private Dialog loginDialog;
     private Dialog registerDialog;
     private SharedPreferences prefs;
     private SharedPreferences.Editor editor;
-    private String encodedImage = "";
+    private String currentPhotoPath;
     private ImageView previewImage;
     private ActivityResultLauncher<Intent> takePicture;
-
-
     private ActivityResultLauncher<String> pickImage;
 
     @Override
@@ -84,27 +85,23 @@ public class MainActivity extends BaseActivity {
         initializeDialogs();
         checkUserLoggedIn();
         registerCamera();
-
     }
+
     private void registerCamera() {
         takePicture = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        Bundle extras = result.getData().getExtras();
-                        Bitmap imageBitmap = (Bitmap) extras.get("data");
-                        previewImage.setImageBitmap(imageBitmap);
-                        encodedImage = bitmapToBase64(imageBitmap);
+                    if (result.getResultCode() == RESULT_OK) {
+                        if (currentPhotoPath != null) {
+                            Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
+                            if (bitmap != null) {
+                                previewImage.setImageBitmap(bitmap);
+                            }
+                        }
                     }
                 });
     }
-    private String bitmapToBase64(Bitmap bitmap) {
-        Bitmap resizedBitmap = resizeBitmap(bitmap, 500);
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream);
-        byte[] byteArray = byteArrayOutputStream.toByteArray();
-        return Base64.encodeToString(byteArray, Base64.DEFAULT);
-    }
+
     private void registerImagePicker() {
         pickImage = registerForActivityResult(
                 new ActivityResultContracts.GetContent(),
@@ -113,7 +110,7 @@ public class MainActivity extends BaseActivity {
                         try {
                             previewImage.setImageURI(uri);
 
-                            encodedImage = encodeImageToBase64(uri);
+                            currentPhotoPath = createImageFileFromUri(uri);
                         } catch (Exception e) {
                             Log.e("ImagePicker", "Error al procesar la imagen", e);
                             Toast.makeText(this, "Error al procesar la imagen", Toast.LENGTH_SHORT).show();
@@ -122,39 +119,34 @@ public class MainActivity extends BaseActivity {
                 });
     }
 
-    private String encodeImageToBase64(Uri imageUri) {
+    private String createImageFileFromUri(Uri uri) {
         try {
-            InputStream inputStream = getContentResolver().openInputStream(imageUri);
-            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+            String imageFileName = "JPEG_" + timeStamp + "_";
+            File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File imageFile = File.createTempFile(
+                    imageFileName,
+                    ".jpg",
+                    storageDir
+            );
 
-            Bitmap resizedBitmap = resizeBitmap(bitmap, 500); // 500px máximo
+            InputStream inputStream = getContentResolver().openInputStream(uri);
+            FileOutputStream outputStream = new FileOutputStream(imageFile);
 
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream);
-            byte[] byteArray = byteArrayOutputStream.toByteArray();
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
 
-            return Base64.encodeToString(byteArray, Base64.DEFAULT);
-        } catch (FileNotFoundException e) {
-            Log.e("ImageEncoder", "Archivo no encontrado", e);
-            return "";
+            outputStream.close();
+            inputStream.close();
+
+            return imageFile.getAbsolutePath();
+        } catch (IOException e) {
+            Log.e("ImageFile", "Error creating image file", e);
+            return null;
         }
-    }
-
-    private Bitmap resizeBitmap(Bitmap bitmap, int maxSize) {
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-
-        float ratio = (float) width / (float) height;
-
-        if (ratio > 1) {
-            width = maxSize;
-            height = (int) (width / ratio);
-        } else {
-            height = maxSize;
-            width = (int) (height * ratio);
-        }
-
-        return Bitmap.createScaledBitmap(bitmap, width, height, true);
     }
 
     private void setupWelcomeScreen() {
@@ -237,7 +229,18 @@ public class MainActivity extends BaseActivity {
         btnCamera.setOnClickListener(v -> {
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             try {
-                takePicture.launch(takePictureIntent);
+                File photoFile = createImageFile();
+
+                if (photoFile != null) {
+                    Uri photoURI = FileProvider.getUriForFile(this,
+                            getPackageName() + ".provider",
+                            photoFile);
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                    takePicture.launch(takePictureIntent);
+                }
+            } catch (IOException ex) {
+                Toast.makeText(this, "Error creando archivo de imagen", Toast.LENGTH_SHORT).show();
+                Log.e("CAMERA", "Error creating image file", ex);
             } catch (ActivityNotFoundException e) {
                 Toast.makeText(this, "No se encontró una aplicación de cámara", Toast.LENGTH_SHORT).show();
             }
@@ -273,6 +276,20 @@ public class MainActivity extends BaseActivity {
         });
     }
 
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,
+                ".jpg",
+                storageDir
+        );
+
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+
     private void performRegistration(String nombre, String email, String password) {
         Data.Builder dataBuilder = new Data.Builder()
                 .putString("accion", "insertar")
@@ -294,46 +311,97 @@ public class MainActivity extends BaseActivity {
                     if (workInfo != null && workInfo.getState().isFinished()) {
                         if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
                             String code = workInfo.getOutputData().getString("code");
-                            if (code.equals("0")) {
+                            if (code != null && code.equals("0")) {
                                 Toast.makeText(getApplicationContext(), "Registro completado", Toast.LENGTH_SHORT).show();
 
-                                if (!encodedImage.isEmpty()) {
+                                if (currentPhotoPath != null) {
                                     uploadProfileImage(nombre);
                                 }
 
                                 registerDialog.dismiss();
                                 performLogin(email, password, true);
-                                finish();
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Error en el registro, email already registered?", Toast.LENGTH_SHORT).show();
                             }
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Error en el registro", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
     }
 
     private void uploadProfileImage(String nombreUsuario) {
-        Data imageData = new Data.Builder()
-                .putString("accion", "setpfp")
-                .putString("nombre", nombreUsuario)
-                .putString("pic", encodedImage)
-                .build();
+        File imageFile = new File(currentPhotoPath);
+        if (!imageFile.exists() || !imageFile.canRead()) {
+            Log.e("UPLOAD", "File does not exist or cannot be read: " + currentPhotoPath);
+            Toast.makeText(getApplicationContext(), "Error al procesar la imagen", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        OneTimeWorkRequest uploadRequest = new OneTimeWorkRequest.Builder(BDConnector.class)
-                .setInputData(imageData)
-                .build();
+        if (imageFile.length() == 0) {
+            Log.e("UPLOAD", "File is empty: " + currentPhotoPath);
+            Toast.makeText(getApplicationContext(), "Archivo de imagen vacío", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        WorkManager.getInstance(this).enqueue(uploadRequest);
+        try {
+            Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
+            if (bitmap == null) {
+                Log.e("UPLOAD", "Failed to decode bitmap from file: " + currentPhotoPath);
+                Toast.makeText(getApplicationContext(), "Error al procesar la imagen", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-        WorkManager.getInstance(getApplicationContext())
-                .getWorkInfoByIdLiveData(uploadRequest.getId())
-                .observe(this, workInfo -> {
-                    if (workInfo != null && workInfo.getState().isFinished()) {
-                        if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
-                            Log.d("UPLOAD", "Imagen subida exitosamente");
-                        } else {
-                            Log.e("UPLOAD", "Error al subir la imagen");
+            Data imageData = new Data.Builder()
+                    .putString("url","2") // luken....
+                    .putString("accion", "setpfp")
+                    .putString("nombre", nombreUsuario)
+                    .putString("pic", currentPhotoPath)
+                    .build();
+
+            OneTimeWorkRequest uploadRequest = new OneTimeWorkRequest.Builder(BDConnector.class)
+                    .setInputData(imageData)
+                    .setBackoffCriteria(
+                            androidx.work.BackoffPolicy.LINEAR,
+                            OneTimeWorkRequest.MIN_BACKOFF_MILLIS,
+                            TimeUnit.MILLISECONDS)
+                    .build();
+
+            WorkManager.getInstance(this).enqueue(uploadRequest);
+
+            WorkManager.getInstance(getApplicationContext())
+                    .getWorkInfoByIdLiveData(uploadRequest.getId())
+                    .observe(this, workInfo -> {
+                        if (workInfo != null && workInfo.getState().isFinished()) {
+                            if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                                String code = workInfo.getOutputData().getString("code");
+                                if (code != null && code.equals("0")) {
+                                    String url = workInfo.getOutputData().getString("url");
+                                    if (url != null) {
+                                        Log.d("UPLOAD", "Imagen subida exitosamente: " + url);
+
+                                        SharedPreferences.Editor editor = prefs.edit();
+                                        editor.putString("lastPfp", url);
+                                        editor.apply();
+
+                                        Toast.makeText(getApplicationContext(),
+                                                "Imagen de perfil actualizada",
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                } else {
+                                    Log.e("UPLOAD", "Error al subir la imagen. Código: " + code);
+                                }
+                            } else if (workInfo.getState() == WorkInfo.State.FAILED) {
+                                String errorMsg = workInfo.getOutputData().getString("message");
+                                Log.e("UPLOAD", "Error al subir la imagen: " +
+                                        (errorMsg != null ? errorMsg : "Error desconocido"));
+                            }
                         }
-                    }
-                });
+                    });
+        } catch (Exception e) {
+            Log.e("UPLOAD", "Exception when preparing upload", e);
+            Toast.makeText(getApplicationContext(), "Error al preparar la imagen", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void checkUserLoggedIn() {
@@ -364,7 +432,7 @@ public class MainActivity extends BaseActivity {
         etPassword.setText("");
         etConfirmarPassword.setText("");
         previewImage.setImageResource(R.drawable.person2);
-        encodedImage = "";
+        currentPhotoPath = null;
 
         registerDialog.show();
     }
@@ -382,7 +450,6 @@ public class MainActivity extends BaseActivity {
 
         WorkManager.getInstance(MainActivity.this).enqueue(request);
 
-        // Listen for result
         WorkManager.getInstance(getApplicationContext())
                 .getWorkInfoByIdLiveData(request.getId())
                 .observe(MainActivity.this, workInfo -> {
@@ -391,7 +458,7 @@ public class MainActivity extends BaseActivity {
                             String mensaje = workInfo.getOutputData().getString("message");
                             Log.d("WORKER", "¡200! " + mensaje);
                             String code = workInfo.getOutputData().getString("code");
-                            if (code.equals("0")) {
+                            if (code != null && code.equals("0")) {
                                 Toast.makeText(getApplicationContext(), getString(R.string.loginExitoso), Toast.LENGTH_SHORT).show();
                                 int id = workInfo.getOutputData().getInt("id", 0);
                                 String nombre = workInfo.getOutputData().getString("nombre");
@@ -405,7 +472,7 @@ public class MainActivity extends BaseActivity {
                                 editor.apply();
 
                                 navigateToMapActivity();
-                            } else if (code.equals("1")) {
+                            } else if (code != null && code.equals("1")) {
                                 Toast.makeText(getApplicationContext(), getString(R.string.loginIncorrecto), Toast.LENGTH_SHORT).show();
                             } else {
                                 Toast.makeText(getApplicationContext(), getString(R.string.loginError), Toast.LENGTH_SHORT).show();
