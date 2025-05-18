@@ -115,6 +115,8 @@
     <string name="confirmar_password">Confirmar contraseña</string>
     <string name="completar_registro">Completar registro</string>
 
+    <string name="error_loading_leaderboard">Error al cargar el leaderboard</string>
+    <string name="leaderboard_top_5">Top 5 del Leaderboard</string>
 
     <string name="traduccion">Traducir</string>
     <string name="traduciendo">Traduciendo...</string>

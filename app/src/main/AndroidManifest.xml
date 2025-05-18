@@ -31,7 +31,7 @@
             android:name=".MapActivity"
             android:exported="false" />
         <receiver
-            android:name="widget.MapAppWidget"
+            android:name="widget.LeaderboardAppWidget"
             android:label="Mapa GazteMap"
             android:exported="true">
             <intent-filter>
@@ -39,7 +39,7 @@
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/widget_map_app_info" />
+                android:resource="@xml/widget_map_app_info"  />
         </receiver>
         <activity
             android:name=".BaseActivity"

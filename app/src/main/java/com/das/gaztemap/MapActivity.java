@@ -1,15 +1,12 @@
 package com.das.gaztemap;
 
 import android.app.AlertDialog;
-import android.app.ComponentCaller;
-import android.app.DialogFragment;
 import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -28,7 +25,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.FragmentActivity;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
@@ -42,7 +38,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -54,7 +49,6 @@ import com.google.maps.android.data.geojson.GeoJsonFeature;
 import com.google.maps.android.data.geojson.GeoJsonLayer;
 import com.google.maps.android.data.geojson.GeoJsonLineString;
 import com.google.maps.android.data.geojson.GeoJsonLineStringStyle;
-import com.google.maps.android.data.geojson.GeoJsonPolygonStyle;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,16 +60,11 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.ArrayList;
-import java.util.List;
 
 import okhttp3.RequestBody;
-import widget.MapAppWidget;
+import widget.LeaderboardAppWidget;
 
 //import com.google.transit.realtime.GtfsRealtime; //mirar builld.gradle para detalles
 import okhttp3.OkHttpClient;
@@ -825,18 +814,11 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.close();
             Log.d("MapActivity", "Mapa guardado en caché exitosamente: " + file.getAbsolutePath());
-            updateWidget(); // Actualizar el widget
         } catch (Exception e) {
             Log.e("MapActivity", "Error al guardar el mapa en caché", e);
         }
     }
 
-    private void updateWidget() {
-        Intent intent = new Intent(this, MapAppWidget.class);
-        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-        sendBroadcast(intent);
-        Log.d("MapActivity", "Widget actualizado");
-    }
     private void enableUserLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
