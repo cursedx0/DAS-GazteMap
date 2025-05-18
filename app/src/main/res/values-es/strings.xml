@@ -109,6 +109,14 @@
     <string name="ver_original">Ver original</string>
     <string name="comentarios">comentarios</string>
     <string name="buscarUsuariosPuntos">Buscar usuarios...</string>
+    <string name="comentaPuntos">Escribe un comentario...</string>
+    <string name="notisActivadas">Notificaciones activadas</string>
+    <string name="errorActivarNotis">Error al activar notificaciones.</string>
+    <string name="notisDesactivadas">Notificaciones desactivadas</string>
+    <string name="errorDesactivarNotis">Error al desactivar notificaciones.</string>
+    <string name="errorComentar">Error al enviar comentario.</string>
+    <string name="comenta">Escribe un comentario</string>
+    <string name="errorCargaComentarios">Error al cargar comentarios.</string>
 
 
 </resources>

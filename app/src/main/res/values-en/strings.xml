@@ -109,5 +109,13 @@
     <string name="ver_original">View original</string>
     <string name="comentarios">comments</string>
     <string name="buscarUsuariosPuntos">Look up users...</string>
+    <string name="comentaPuntos">Write a comment...</string>
+    <string name="notisActivadas">Notifications enabled</string>
+    <string name="errorActivarNotis">Error when trying to enable notifications.</string>
+    <string name="notisDesactivadas">Notifications disabled</string>
+    <string name="errorDesactivarNotis">Error when trying to disable notifications.</string>
+    <string name="errorComentar">Error when trying to send the comment.</string>
+    <string name="comenta">Write a comment</string>
+    <string name="errorCargaComentarios">Error when trying to load comments.</string>
 
 </resources>

@@ -121,10 +121,10 @@ public class CommentsActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         Log.d("FCM", "Suscripción exitosa");
                         guardarEstadoSubscripcion(true);
-                        Toast.makeText(this, "Notificaciones activadas", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.notisActivadas), Toast.LENGTH_SHORT).show();
                     } else {
                         Log.e("FCM", "Error en suscripción", task.getException());
-                        Toast.makeText(this, "Error al activar notificaciones", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.errorActivarNotis), Toast.LENGTH_SHORT).show();
                         new Handler(Looper.getMainLooper()).postDelayed(this::suscribirATopic, 2000);
                     }
                 });
@@ -136,9 +136,9 @@ public class CommentsActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         guardarEstadoSubscripcion(false);
-                        Toast.makeText(this, "Notificaciones desactivadas", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.notisDesactivadas), Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(this, "Error al desactivar notificaciones", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.errorDesactivarNotis), Toast.LENGTH_SHORT).show();
                         new Handler(Looper.getMainLooper()).postDelayed(this::desuscribirDeTopic, 2000);
                     }
                 });
@@ -179,7 +179,7 @@ public class CommentsActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 },
-                error -> Toast.makeText(this, "Error al cargar comentarios", Toast.LENGTH_SHORT).show()
+                error -> Toast.makeText(this, getString(R.string.errorCargaComentarios), Toast.LENGTH_SHORT).show()
         );
 
         Volley.newRequestQueue(this).add(request);
@@ -188,7 +188,7 @@ public class CommentsActivity extends AppCompatActivity {
     private void enviarComentario() {
         String contenido = editTextComment.getText().toString().trim();
         if (contenido.isEmpty()) {
-            Toast.makeText(this, "Escribe un comentario", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.comenta), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -216,7 +216,7 @@ public class CommentsActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 },
-                error -> Toast.makeText(this, "Error al enviar comentario", Toast.LENGTH_SHORT).show()
+                error -> Toast.makeText(this, getString(R.string.errorComentar), Toast.LENGTH_SHORT).show()
         );
 
         Volley.newRequestQueue(this).add(request);

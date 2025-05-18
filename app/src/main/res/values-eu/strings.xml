@@ -109,5 +109,13 @@
     <string name="ver_original">Ikusi jatorrizkoa</string>
     <string name="comentarios">iruzkin</string>
     <string name="buscarUsuariosPuntos">Erabiltzaileak bilatu...</string>
+    <string name="comentaPuntos">Iruzkin bat idatzi...</string>
+    <string name="notisActivadas">Jakinarazpenak aktibatu egin dira</string>
+    <string name="errorActivarNotis">Arazoak egon dira jakinarazpenak aktibatzerakoan.</string>
+    <string name="notisDesactivadas">Jakinarazpenak desaktibatu egin dira</string>
+    <string name="errorDesactivarNotis">Arazoak egon dira jakinarazpenak desaktibatzerakoan.</string>
+    <string name="errorComentar">Arazoak egon dira iruzkina bidaltzean.</string>
+    <string name="comenta">Iruzkin bat idatzi</string>
+    <string name="errorCargaComentarios">Arazoak egon dira iruzkinak kargatzekoan</string>
 
 </resources>
