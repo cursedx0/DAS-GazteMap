@@ -3,9 +3,12 @@ package com.das.gaztemap;
 import android.Manifest;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -39,38 +42,43 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
-    protected void attachBaseContext(Context newBase) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(newBase);
-        String savedLanguage = prefs.getString("idioma", "ES");
-
-        Locale locale = new Locale(savedLanguage);
-        Locale.setDefault(locale);
-
-        /*String savedTheme = prefs.getString("tema", "SY");
-        Log.i("BUENAS", savedTheme);
-        setThemeMode(savedTheme);*/
-
-        Configuration config = new Configuration(newBase.getResources().getConfiguration());
-        config.setLocale(locale);
-        Context context = newBase.createConfigurationContext(config);
-
-        super.attachBaseContext(context); //Aplica el contexto con el nuevo idioma
-    }
-
     protected void setLocale(String languageCode) {
         Log.i("BaseActivity", "Cambiando idioma a: " + languageCode);
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        prefs.edit().putString("idioma", languageCode).apply(); //Guarda el idioma correctamente
+        String currentLang = prefs.getString("idioma", "ES");
 
-        Locale locale = new Locale(languageCode);
+        // pa que hacer nada
+        if (currentLang.equals(languageCode)) {
+            return;
+        }
+
+        prefs.edit().putString("idioma", languageCode).apply();
+
+        // reinicio
+        Intent intent = new Intent(this, AllActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        //asesinamos el proceso
+        android.os.Process.killProcess(android.os.Process.myPid());
+        System.exit(0);
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(updateBaseContext(newBase));
+    }
+
+    private Context updateBaseContext(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String lang = prefs.getString("idioma", "ES");
+        Locale locale = new Locale(lang);
         Locale.setDefault(locale);
 
-        Configuration config = new Configuration(getResources().getConfiguration());
-        config.setLocale(locale);
-        getBaseContext().getResources().updateConfiguration(config, getBaseContext().getResources().getDisplayMetrics());
+        Configuration config = context.getResources().getConfiguration();
 
-        recreate(); //Reinicia la actividad para aplicar los cambios
+        config.setLocale(locale);
+        return context.createConfigurationContext(config);
     }
 
     protected void setThemeMode(String theme, boolean reset) {
