@@ -117,6 +117,8 @@
     <string name="errorComentar">Error al enviar comentario.</string>
     <string name="comenta">Escribe un comentario</string>
     <string name="errorCargaComentarios">Error al cargar comentarios.</string>
+    <string name="compUbicación">Compartir ubicación</string>
+    <string name="cuExplicado">Permite a tus amigos ver tu ubicación.</string>
 
 
 </resources>

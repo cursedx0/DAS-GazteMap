@@ -117,5 +117,7 @@
     <string name="errorComentar">Arazoak egon dira iruzkina bidaltzean.</string>
     <string name="comenta">Iruzkin bat idatzi</string>
     <string name="errorCargaComentarios">Arazoak egon dira iruzkinak kargatzekoan</string>
+    <string name="compUbicación">Kokapena partekatu</string>
+    <string name="cuExplicado">Zure lagunek zure kokapena ikustea onartzen du.</string>
 
 </resources>

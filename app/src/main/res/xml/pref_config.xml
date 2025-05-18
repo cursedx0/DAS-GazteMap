@@ -21,8 +21,8 @@
             android:title="@string/eligeTema" />
     </PreferenceCategory>
     <SwitchPreferenceCompat
+        app:defaultValue="true"
         app:key="compartir_ubicacion"
-        app:title="Compartir ubicación"
-        app:summary="Permite a tus amigos ver tu ubicación"
-        app:defaultValue="true" />
+        app:summary="@string/cuExplicado"
+        app:title="@string/compUbicación" />
 </PreferenceScreen>
