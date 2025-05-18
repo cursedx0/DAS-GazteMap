@@ -1,6 +1,7 @@
 package com.das.gaztemap;
 
 import android.app.AlertDialog;
+import android.app.ComponentCaller;
 import android.app.DialogFragment;
 import android.appwidget.AppWidgetManager;
 import android.content.Intent;
@@ -68,6 +69,7 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.List;
@@ -103,6 +105,7 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
     private LinearLayout transportOptions;
     private LinearLayout optionWalking, optionBus, optionBicycle;
     private String selectedTransportMode = "walking"; // valor por defecto
+    private String currentLanguage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,6 +129,10 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
             obtenerPfpNav();
             // imagen: imgPerfil.setImageResource(fotolukenserver);
         }
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MapActivity.this);
+        currentLanguage = prefs.getString("idioma","ES");
+
         Button botonEdit = headerView.findViewById(R.id.btnEditUser);
         botonEdit.setOnClickListener(v -> {
             EditarUsuarioDF edf = EditarUsuarioDF.newIntance(nombre);
@@ -134,7 +141,6 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
 
         Button botonCerrar = headerView.findViewById(R.id.btnLogout);
         botonCerrar.setOnClickListener(a -> {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MapActivity.this);
             SharedPreferences.Editor editor = prefs.edit();
             Intent logout = new Intent(MapActivity.this, MainActivity.class);
             editor.putBoolean("rember", false);
@@ -1031,7 +1037,7 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
             navigationView.setCheckedItem(R.id.Viajar);
         } else if (id == R.id.Amigos) {
             Intent intent = new Intent(MapActivity.this, AllActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //| Intent.FLAG_ACTIVITY_SINGLE_TOP);
             intent.putExtra("frag","amigos");
             actExtras();
             intent.putExtra("nombre",nombre);
@@ -1044,6 +1050,7 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
             actExtras();
             intent.putExtra("nombre", nombre);
             intent.putExtra("email", email);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //| Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
         } else if (id == R.id.Foro){
             Intent intent = new Intent(MapActivity.this, ForumActivity.class);
@@ -1052,11 +1059,12 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
             actExtras();
             intent.putExtra("nombre",nombre);
             intent.putExtra("email",email);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //| Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
         }
         else if (id == R.id.Opciones) {
             Intent intent = new Intent(MapActivity.this, AllActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //| Intent.FLAG_ACTIVITY_SINGLE_TOP);
             intent.putExtra("frag","opciones");
             actExtras();
             intent.putExtra("nombre",nombre);
@@ -1088,8 +1096,6 @@ public class MapActivity extends BaseActivity implements OnMapReadyCallback, Nav
             }
             nombre = prefs.getString("nombre","error");
             email = prefs.getString("email","errormail");
-            setLocale(prefs.getString("idioma","error"));
-            setThemeMode(prefs.getString("tema","error"),true);
         }
     }
 

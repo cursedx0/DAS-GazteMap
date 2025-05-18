@@ -357,13 +357,13 @@ public class ForumActivity extends BaseActivity implements NavigationView.OnNavi
 
         if (id == R.id.Viajar) {
             Intent intent = new Intent(ForumActivity.this, MapActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //| Intent.FLAG_ACTIVITY_SINGLE_TOP);
             intent.putExtra("nombre", userName);
             intent.putExtra("email", userEmail);
             startActivity(intent);
         } else if (id == R.id.Amigos) {
             Intent intent = new Intent(ForumActivity.this, AllActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //| Intent.FLAG_ACTIVITY_SINGLE_TOP);
             intent.putExtra("frag", "amigos");
             intent.putExtra("nombre", userName);
             intent.putExtra("email", userEmail);
@@ -372,12 +372,13 @@ public class ForumActivity extends BaseActivity implements NavigationView.OnNavi
             Intent intent = new Intent(ForumActivity.this, LeaderboardActivity.class);
             intent.putExtra("nombre", userName);
             intent.putExtra("email", userEmail);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //| Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
         } else if (id == R.id.Foro) {
             // Ya estamos en el foro, no hacer nada
         } else if (id == R.id.Opciones) {
             Intent intent = new Intent(ForumActivity.this, AllActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //| Intent.FLAG_ACTIVITY_SINGLE_TOP);
             intent.putExtra("frag", "opciones");
             intent.putExtra("nombre", userName);
             intent.putExtra("email", userEmail);

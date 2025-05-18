@@ -226,7 +226,7 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
         int id = item.getItemId();
         if (id == R.id.Viajar) {
             Intent intent = new Intent(AllActivity.this, MapActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);// | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             actExtras();
 
             startActivity(intent);
@@ -245,6 +245,7 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
             actExtras();
             intent.putExtra("nombre", nombre);
             intent.putExtra("email", email);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);// | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
         } else if (id == R.id.Foro){
             Intent intent = new Intent(AllActivity.this, ForumActivity.class);
@@ -253,6 +254,7 @@ public class AllActivity extends BaseActivity implements NavigationView.OnNaviga
             actExtras();
             intent.putExtra("nombre",nombre);
             intent.putExtra("email",email);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);// | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
         }
         else if (id == R.id.Opciones) {
