@@ -59,7 +59,7 @@
     <string name="menu_button">Open menu</string>
     <string name="apartados">📌 Sections</string>
     <string name="apartado_mapa">🗺️ Map</string>
-    <string name="apartado_TOP500">🏆 Top 500 users</string>
+    <string name="apartado_TOP500">🏆 Top users</string>
     <string name="apartado_amigos">🤝 Friends</string>
     <string name="apartado_foro">💬 Forum</string>
     <string name="apartado_configuracion">⚙️ Options</string>
