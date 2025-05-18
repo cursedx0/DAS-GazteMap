@@ -46,7 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ForumActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class ForumActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private RecyclerView recyclerViewPosts;
     private EditText editTextPost;
