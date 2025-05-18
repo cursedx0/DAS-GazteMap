@@ -18,7 +18,7 @@ public class Graph {
         }
     }
 
-    // Método para agregar una arista al grafo
+    // Metodo para agregar una arista al grafo
     public void addEdge(LatLng source, LatLng destination, double weight) {
         adjacencyList.computeIfAbsent(source, k -> new ArrayList<>()).add(new Edge(destination, weight));
         adjacencyList.computeIfAbsent(destination, k -> new ArrayList<>()).add(new Edge(source, weight)); // Grafo no dirigido
@@ -28,7 +28,7 @@ public class Graph {
         return adjacencyList.keySet();
     }
 
-    // Método para calcular la ruta más corta usando Dijkstra
+    // Metodo para calcular la ruta más corta usando Dijkstra
     public List<LatLng> getShortestPath(LatLng start, LatLng end) {
         Map<LatLng, Double> distances = new HashMap<>();
         Map<LatLng, LatLng> previousNodes = new HashMap<>();
