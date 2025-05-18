@@ -50,9 +50,11 @@
             android:layout_marginTop="16dp"
             android:text="@string/editarPerfil"
             android:textAllCaps="false"
+            android:textColor="@color/blanco"
             app:cornerRadius="8dp"
             app:icon="@drawable/manage_accounts"
-            app:iconGravity="textStart" />
+            app:iconGravity="textStart"
+            app:iconTint="@color/blanco" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLogout"

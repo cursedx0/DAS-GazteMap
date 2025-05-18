@@ -10,33 +10,32 @@
         android:enabled="false"
         app:actionLayout="@layout/nav_perfil"/>
 
+    <group
+        android:id="@+id/grupo"
+        android:checkableBehavior="single"
+        android:title="@string/apartados">
+
+        <item
+            android:id="@+id/Viajar"
+            android:title="@string/apartado_mapa" />
+
+        <item
+            android:id="@+id/Top500"
+            android:title="@string/apartado_TOP500" />
+
+        <item
+            android:id="@+id/Amigos"
+            android:title="@string/apartado_amigos" />
+        <item
+            android:id="@+id/Foro"
+            android:title="@string/apartado_foro" />
+        <item
+            android:id="@+id/Opciones"
+            android:title="@string/apartado_configuracion" />
+
+    </group>
     <item android:title="@string/apartados">
-        <menu>
-            <group
-                android:id="@+id/grupo"
-                android:checkableBehavior="single"
-                android:title="@string/apartados">
-
-                <item
-                    android:id="@+id/Viajar"
-                    android:title="@string/apartado_mapa" />
-
-                <item
-                    android:id="@+id/Top500"
-                    android:title="@string/apartado_TOP500" />
-
-                <item
-                    android:id="@+id/Amigos"
-                    android:title="@string/apartado_amigos" />
-                <item
-                    android:id="@+id/Foro"
-                    android:title="@string/apartado_foro" />
-                <item
-                    android:id="@+id/Opciones"
-                    android:title="@string/apartado_configuracion" />
-
-            </group>
-        </menu>
+        <menu></menu>
     </item>
 
 </menu>
