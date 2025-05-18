@@ -119,5 +119,6 @@
     <string name="errorCargaComentarios">Arazoak egon dira iruzkinak kargatzekoan</string>
     <string name="compUbicación">Kokapena partekatu</string>
     <string name="cuExplicado">Zure lagunek zure kokapena ikustea onartzen du.</string>
+    <string name="pendiente">Zintzilik</string>
 
 </resources>

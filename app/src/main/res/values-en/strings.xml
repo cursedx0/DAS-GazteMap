@@ -119,5 +119,6 @@
     <string name="errorCargaComentarios">Error when trying to load comments.</string>
     <string name="compUbicación">Share location</string>
     <string name="cuExplicado">Lets your friends see your location.</string>
+    <string name="pendiente">Pending</string>
 
 </resources>

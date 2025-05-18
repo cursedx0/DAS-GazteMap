@@ -34,7 +34,7 @@ public class PersonasAdapter extends RecyclerView.Adapter<PersonasAdapter.Person
         View vista = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_persona, parent, false);
         //buttonAdd = vista.findViewById(R.id.btnSolicitar);
-        return new PersonaViewHolder(vista);
+        return new PersonaViewHolder(vista, context);
     }
 
     @Override
@@ -64,9 +64,11 @@ public class PersonasAdapter extends RecyclerView.Adapter<PersonasAdapter.Person
         ImageView imagen;
         TextView nombre;
         Button botonEnviar;
+        Context context;
 
-        public PersonaViewHolder(@NonNull View itemView) {
+        public PersonaViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
+            this.context = context;
             imagen = itemView.findViewById(R.id.imgPersona);
             nombre = itemView.findViewById(R.id.txtNombre);
             botonEnviar = itemView.findViewById(R.id.btnSolicitar);
@@ -74,6 +76,9 @@ public class PersonasAdapter extends RecyclerView.Adapter<PersonasAdapter.Person
         void bind(Amigo persona) {
             botonEnviar.setOnClickListener(v -> {
                 if (listener != null) {
+                    botonEnviar.setAlpha(0.5f);
+                    botonEnviar.setEnabled(false);
+                    botonEnviar.setText(context.getString(R.string.pendiente)); //getString aqui
                     listener.onAgregarClick(persona);
                 }
             });

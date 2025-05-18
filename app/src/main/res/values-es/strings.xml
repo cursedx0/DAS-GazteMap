@@ -119,6 +119,7 @@
     <string name="errorCargaComentarios">Error al cargar comentarios.</string>
     <string name="compUbicación">Compartir ubicación</string>
     <string name="cuExplicado">Permite a tus amigos ver tu ubicación.</string>
+    <string name="pendiente">Pendiente</string>
 
 
 </resources>
