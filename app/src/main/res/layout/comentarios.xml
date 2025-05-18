@@ -32,7 +32,7 @@
             android:layout_width="329dp"
             android:layout_height="69dp"
             android:layout_weight="1"
-            app:boxBackgroundColor="@color/white"
+            app:boxBackgroundColor="@color/comentarioesc"
             app:boxBackgroundMode="outline"
             app:boxStrokeColor="@color/gris_azulado_700"
             app:layout_constraintStart_toStartOf="parent"

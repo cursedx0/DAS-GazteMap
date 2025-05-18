@@ -51,7 +51,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
         this.commentList = commentList;
         this.currentUserId = currentUserId;
 
-        // Get device language or app language
+        //device language
         currentLanguageCode = Locale.getDefault().getLanguage();
         if (currentLanguageCode.equals("es")) {
             currentLanguageCode = TranslateLanguage.SPANISH;
@@ -89,13 +89,10 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
             holder.comentario.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
         }
 
-        // Load profile image
         loadProfileImage(holder.imageViewProfile, comment.getUserId());
 
-        // Set translation button click listener
         holder.buttonTraduccion.setOnClickListener(v -> translateComment(comment, holder));
 
-        // Track if comment is translated
         holder.isTranslated = false;
         holder.originalContent = comment.getContent();
     }
@@ -172,7 +169,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
                     Translator translator = getTranslator(sourceLanguageCode, targetLanguage);
                     translator.downloadModelIfNeeded()
                             .addOnSuccessListener(unused -> {
-                                // Modelo descargado, proceder con traducción
+                                // Modelo descargado
                                 translator.translate(textToTranslate)
                                         .addOnSuccessListener(translatedText -> {
                                             Log.d(TAG, "Translation successful. Translated text: " + translatedText);
@@ -199,7 +196,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
                 });
     }
     private boolean isLanguageSupported(String languageCode) {
-        // List of languages supported by ML Kit Translate
         Set<String> supportedLanguages = new HashSet<>(TranslateLanguage.getAllLanguages());
         return supportedLanguages.contains(languageCode);
     }
