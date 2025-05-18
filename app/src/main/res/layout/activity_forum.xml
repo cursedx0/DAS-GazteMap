@@ -84,6 +84,7 @@
                         android:layout_gravity="end"
                         android:layout_marginTop="8dp"
                         android:text="@string/publicar"
+                        android:textColor="@color/azul_800"
                         app:icon="@drawable/publish"
                         app:iconTint="@color/white"
                         app:backgroundTint="@color/black"
