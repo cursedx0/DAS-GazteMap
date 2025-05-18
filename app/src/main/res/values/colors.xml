@@ -28,6 +28,9 @@
     <color name="widget_texto_fecha">#FF607D8B</color>
     <color name="azuladito">#ADD8E6</color>
 
+    <color name="primary">#6200EE</color>
+    <color name="gray">#DDDDDD</color>
+
 
 
     <color name="mensaje_enviado_background">#0078FF</color>

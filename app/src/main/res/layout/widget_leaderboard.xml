@@ -4,7 +4,8 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="8dp"
-    android:background="@color/white">
+    android:background="@drawable/rounded_background"
+    android:elevation="4dp">
 
     <TextView
         android:id="@+id/widget_title"
@@ -12,15 +13,19 @@
         android:layout_height="wrap_content"
         android:text="@string/leaderboard_top_5"
         android:textStyle="bold"
-        android:textSize="16sp"
+        android:textSize="18sp"
         android:gravity="center"
-        android:paddingBottom="8dp" />
+        android:padding="8dp"
+        android:background="@color/primary"
+        android:textColor="@color/white" />
 
     <TextView
         android:id="@+id/leaderboard_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="14sp"
-        android:padding="4dp"
+        android:padding="8dp"
+        android:lineSpacingExtra="4dp"
+        android:textColor="@color/white"
         android:scrollbars="vertical" />
 </LinearLayout>
