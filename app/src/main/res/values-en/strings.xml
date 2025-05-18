@@ -23,8 +23,8 @@
     <string name="sistema">System</string>
     <string name="oscuro">Dark</string>
     <string name="claro">Bright</string>
-    <string name="idioma">Language</string>
-    <string name="tema">Theme</string>
+    <string name="idioma">🌐 Language</string>
+    <string name="tema">🎨 Theme</string>
     <string name="eligeIdioma">Choose a language</string>
     <string name="eligeTema">Choose a theme</string>
     <string name="errorEmail">Insert a valid email.</string>

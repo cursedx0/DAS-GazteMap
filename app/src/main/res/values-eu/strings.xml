@@ -23,8 +23,8 @@
     <string name="sistema">Sistema</string>
     <string name="oscuro">Iluna</string>
     <string name="claro">Argia</string>
-    <string name="idioma">Hizkuntza</string>
-    <string name="tema">Estilo</string>
+    <string name="idioma">🌐 Hizkuntza</string>
+    <string name="tema">🎨 Estilo</string>
     <string name="eligeIdioma">Hizkuntz bat aukeratu</string>
     <string name="eligeTema">Estilo bat aukeratu</string>
     <string name="errorEmail">Baliozko email bat idatzi.</string>
